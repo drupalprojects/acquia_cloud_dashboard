@@ -9,7 +9,7 @@
  * Acquia Cloud API settings form.
  * @return array
  */
-function acquia_cloud_api_configure_form() {
+function acquia_cloud_dashboard_configure_form() {
   $form = array();
 
   $form['acquia_cloud_username'] = array(
@@ -54,7 +54,7 @@ function acquia_cloud_api_configure_form() {
 /**
  *  Domain addition form function
  */
-function acquia_cloud_api_configure_add_domain_form($form_state, $form, $site_name, $env) {
+function acquia_cloud_dashboard_configure_add_domain_form($form_state, $form, $site_name, $env) {
   $form = array();
   $form['acquia_cloud_domain_site'] = array(
     '#type' => 'textfield',
@@ -91,7 +91,7 @@ function acquia_cloud_api_configure_add_domain_form($form_state, $form, $site_na
 /**
  *  SSH Key addition form function
  */
-function acquia_cloud_api_configure_add_key_form($form_state, $form, $site_name) {
+function acquia_cloud_dashboard_configure_add_key_form($form_state, $form, $site_name) {
   $form = array();
   $form['acquia_cloud_key_site'] = array(
     '#type' => 'textfield',
@@ -125,19 +125,19 @@ function acquia_cloud_api_configure_add_key_form($form_state, $form, $site_name)
 /**
  *  Submit handler to add ssh-key form
  */
-function acquia_cloud_api_configure_add_key_form_submit($form, &$form_state) {
+function acquia_cloud_dashboard_configure_add_key_form_submit($form, &$form_state) {
   $site_name = $form_state['values']['acquia_cloud_key_site'];
   $key_nick = $form_state['values']['acquia_cloud_key_nick'];
   $key_key = $form_state['values']['acquia_cloud_key_key'];
 
-  acquia_cloud_curl_caller_post("sites/$site_name/sshkeys", "POST", TRUE, array('ssh_pub_key' => $key_key), array('nickname' => $key_nick));
+  acquia_cloud_dashboard_curl_caller_post("sites/$site_name/sshkeys", "POST", TRUE, array('ssh_pub_key' => $key_key), array('nickname' => $key_nick));
   drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
  *  Delete Domain Form function
  */
-function acquia_cloud_api_configure_delete_domain_form($form_state, $form, $site_name, $env, $domain) {
+function acquia_cloud_dashboard_configure_delete_domain_form($form_state, $form, $site_name, $env, $domain) {
   $form = array();
   $form['acquia_cloud_domain_site'] = array(
     '#type' => 'textfield',
@@ -176,7 +176,7 @@ function acquia_cloud_api_configure_delete_domain_form($form_state, $form, $site
 /**
  *  Purge Cache form function
  */
-function acquia_cloud_api_configure_purge_varnish_form($form_state, $form, $site_name, $env, $domain) {
+function acquia_cloud_dashboard_configure_purge_varnish_form($form_state, $form, $site_name, $env, $domain) {
   $form = array();
   $form['acquia_cloud_purge_domain_site'] = array(
     '#type' => 'textfield',
@@ -215,7 +215,7 @@ function acquia_cloud_api_configure_purge_varnish_form($form_state, $form, $site
 /**
  *  Delete SSH Key form function
  */
-function acquia_cloud_api_configure_delete_key_form($form_state, $form, $site_name, $keyid, $key_nick) {
+function acquia_cloud_dashboard_configure_delete_key_form($form_state, $form, $site_name, $keyid, $key_nick) {
   $form = array();
   $form['acquia_cloud_key_site'] = array(
     '#type' => 'textfield',
@@ -255,55 +255,55 @@ function acquia_cloud_api_configure_delete_key_form($form_state, $form, $site_na
 /**
  *  Submit handler for deleting SSH Key
  */
-function acquia_cloud_api_configure_delete_key_form_submit($form, &$form_state) {
+function acquia_cloud_dashboard_configure_delete_key_form_submit($form, &$form_state) {
   $site_name = $form_state['values']['acquia_cloud_key_site'];
   $key_id = $form_state['values']['acquia_cloud_key_id'];
 
-  acquia_cloud_curl_caller_post("sites/$site_name/sshkeys/$key_id", "DELETE");
+  acquia_cloud_dashboard_curl_caller_post("sites/$site_name/sshkeys/$key_id", "DELETE");
   drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
  *  Submit handler for adding domain
  */
-function acquia_cloud_api_configure_add_domain_form_submit($form, &$form_state) {
+function acquia_cloud_dashboard_configure_add_domain_form_submit($form, &$form_state) {
   $site_name = $form_state['values']['acquia_cloud_domain_site'];
   $env = $form_state['values']['acquia_cloud_domain_env'];
   $domain_name = $form_state['values']['acquia_cloud_domain_domain'];
 
-  acquia_cloud_curl_caller_post("sites/$site_name/envs/$env/domains/$domain_name");
+  acquia_cloud_dashboard_curl_caller_post("sites/$site_name/envs/$env/domains/$domain_name");
   drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
  *  Submit handler for delete domain form
  */
-function acquia_cloud_api_configure_delete_domain_form_submit($form, &$form_state) {
+function acquia_cloud_dashboard_configure_delete_domain_form_submit($form, &$form_state) {
   $site_name = $form_state['values']['acquia_cloud_domain_site'];
   $env = $form_state['values']['acquia_cloud_domain_env'];
   $domain_name = $form_state['values']['acquia_cloud_domain_domain'];
 
-  acquia_cloud_curl_caller_post("sites/$site_name/envs/$env/domains/$domain_name", "DELETE");
+  acquia_cloud_dashboard_curl_caller_post("sites/$site_name/envs/$env/domains/$domain_name", "DELETE");
   drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
  *  Submit handler for purge domain cache form
  */
-function acquia_cloud_api_configure_purge_varnish_form_submit($form, &$form_state) {
+function acquia_cloud_dashboard_configure_purge_varnish_form_submit($form, &$form_state) {
   $site_name = $form_state['values']['acquia_cloud_purge_domain_site'];
   $env = $form_state['values']['acquia_cloud_purge_domain_env'];
   $domain_name = $form_state['values']['acquia_cloud_purge_domain_domain'];
 
-  acquia_cloud_curl_caller_post("sites/$site_name/envs/$env/domains/$domain_name/cache", "DELETE");
+  acquia_cloud_dashboard_curl_caller_post("sites/$site_name/envs/$env/domains/$domain_name/cache", "DELETE");
   drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
  *  Helper function to manually refresh api report page
  */
-function acquia_cloud_api_report_refresh() {
-  acquia_cloud_get_html_report();
+function acquia_cloud_dashboard_report_refresh() {
+  acquia_cloud_dashboard_get_html_report();
   drupal_set_message(t('Cloud Status Report has been refreshed'), 'warning');
   drupal_goto('admin/config/cloud-api/view');
 }
@@ -311,14 +311,14 @@ function acquia_cloud_api_report_refresh() {
 /**
  *  Page call back that returns the report markup
  */
-function acquia_cloud_api_report() {
+function acquia_cloud_dashboard_report() {
   if (variable_get('acquia_cloud_username', "") != "") {
     $report_html = t('<b>Report was last updated !time_ago ago</b><br/>', array('!time_ago' => format_interval(REQUEST_TIME - variable_get('acquia_cloud_last_report_generated_time'))));
     $report_html .= l(t('Refresh Report'), 'admin/config/cloud-api/refresh');
 
     $time_last_run = variable_get('acquia_cloud_last_report_generated_time', 0);
     if (time() - $time_last_run > variable_get('acquia_cloud_refresh_interval', 3600)) {
-      $report_html .= acquia_cloud_get_html_report();
+      $report_html .= acquia_cloud_dashboard_get_html_report();
     }
     else {
       //dsm(variable_get('acquia_cloud_report_html', t('Report Not Generated Yet')));
@@ -335,12 +335,12 @@ function acquia_cloud_api_report() {
 /**
  *  Helper function that builds the report markup
  */
-function acquia_cloud_get_html_report() {
+function acquia_cloud_dashboard_get_html_report() {
   $report_html = '';
   /*
    * Show Sites info
    */
-  $sites_data = acquia_cloud_curl_caller("sites");
+  $sites_data = acquia_cloud_dashboard_curl_caller("sites");
   $header = array();
   $rows = array();
   $header[] = array("data" => "Site Name");
@@ -353,7 +353,7 @@ function acquia_cloud_get_html_report() {
     /*
      * Get the site info
      */
-    $site_info_array = acquia_cloud_curl_caller("sites/$site_name");
+    $site_info_array = acquia_cloud_dashboard_curl_caller("sites/$site_name");
     $site_rows = array();
     foreach ($site_info_array as $key => $value) {
       $site_row = array();
@@ -368,7 +368,7 @@ function acquia_cloud_get_html_report() {
      * Get the Site SSH Keys
      */
     $site_ssh_table_html = l(t('Add SSH Key to this site'), "admin/config/cloud-api/add/key/$site_name");
-    $site_ssh_keys_array = acquia_cloud_curl_caller("sites/$site_name/sshkeys");
+    $site_ssh_keys_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/sshkeys");
     $site_ssh_keys = array();
     foreach ($site_ssh_keys_array as $key => $value) {
       $site_ssh_row = array();
@@ -387,7 +387,7 @@ function acquia_cloud_get_html_report() {
     /*
      * Get the Site DBs
      */
-    $site_databases_array = acquia_cloud_curl_caller("sites/$site_name/dbs");
+    $site_databases_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/dbs");
     $site_dbs = array();
     foreach ($site_databases_array as $key => $value) {
       $site_db_row = array();
@@ -400,7 +400,7 @@ function acquia_cloud_get_html_report() {
     /*
      * Get the Environments
      */
-    $site_envs_array = acquia_cloud_curl_caller("sites/$site_name/envs");
+    $site_envs_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs");
     $site_envs = array();
     foreach ($site_envs_array as $key => $value) {
       $site_env_row = array();
@@ -410,7 +410,7 @@ function acquia_cloud_get_html_report() {
        * For each Env, get the domains
        */
       $env_domains_table_html = l(t('Add Domain to this Environment'), "admin/config/cloud-api/add/domain/$site_name/$env");
-      $env_domains_array = acquia_cloud_curl_caller("sites/$site_name/envs/$env/domains");
+      $env_domains_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs/$env/domains");
       $env_domains = array();
       foreach ($env_domains_array as $key => $value) {
         $env_domain_row = array();
@@ -426,7 +426,7 @@ function acquia_cloud_get_html_report() {
       /*
        * For each Env, get the servers
        */
-      $env_servers_array = acquia_cloud_curl_caller("sites/$site_name/envs/$env/servers");
+      $env_servers_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs/$env/servers");
       $env_servers = array();
       foreach ($env_servers_array as $key => $value) {
         $env_server_row = array();
@@ -436,7 +436,7 @@ function acquia_cloud_get_html_report() {
         /*
          * Get the server info
          */
-        $server_info_array = acquia_cloud_curl_caller("sites/$site_name/envs/$env/servers/$server_name");
+        $server_info_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs/$env/servers/$server_name");
         $server_rows = array();
         foreach ($server_info_array as $key => $value) {
           $server_row = array();
@@ -466,7 +466,7 @@ function acquia_cloud_get_html_report() {
     /*
      * Get Task List for Site
      */
-    $task_list_raw = acquia_cloud_curl_caller("sites/$site_name/tasks");
+    $task_list_raw = acquia_cloud_dashboard_curl_caller("sites/$site_name/tasks");
     $no_of_tasks = variable_get('acquia_cloud_no_of_tasks', 25);
     $tasks_array_trimmed = array_reverse(array_slice($task_list_raw, -$no_of_tasks));
     $task_rows = array();
@@ -500,7 +500,7 @@ function acquia_cloud_get_html_report() {
 /**
  *  Helper method that makes the Curl Calls (GET)
  */
-function acquia_cloud_curl_caller($method) {
+function acquia_cloud_dashboard_curl_caller($method) {
   $url = "https://cloudapi.acquia.com/v1/" . $method . ".json";
   //  dsm($url);
   $username = variable_get('acquia_cloud_username', "");
@@ -517,7 +517,7 @@ function acquia_cloud_curl_caller($method) {
 /**
  *  Helper function that makes the curl calls (POST)
  */
-function acquia_cloud_curl_caller_post($method, $request = "POST", $binary = FALSE, $post_data = array(), $params = array()) {
+function acquia_cloud_dashboard_curl_caller_post($method, $request = "POST", $binary = FALSE, $post_data = array(), $params = array()) {
   $url = "https://cloudapi.acquia.com/v1/" . $method . ".json";
 
   if (count($params)) {
