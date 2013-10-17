@@ -113,7 +113,7 @@ function acquia_cloud_dashboard_configure_add_key_form($form_state, $form, $site
 
   $form['acquia_cloud_domain_submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Add Domain')
+    '#value' => t('Add Domain'),
   );
 
   return $form;
@@ -163,7 +163,7 @@ function acquia_cloud_dashboard_configure_delete_domain_form($form_state, $form,
 
   $form['acquia_cloud_domain_submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Confirm Deletion of Domain')
+    '#value' => t('Confirm Deletion of Domain'),
   );
 
   return $form;
@@ -201,7 +201,7 @@ function acquia_cloud_dashboard_configure_purge_varnish_form($form_state, $form,
 
   $form['acquia_cloud_purge_domain_submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Confirm Purging Varnish Cache for this domain')
+    '#value' => t('Confirm Purging Varnish Cache for this domain'),
   );
 
   return $form;
@@ -240,7 +240,7 @@ function acquia_cloud_dashboard_configure_delete_key_form($form_state, $form, $s
 
   $form['acquia_cloud_domain_submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Confirm Deletion of SSH Key')
+    '#value' => t('Confirm Deletion of SSH Key'),
   );
 
   return $form;
@@ -315,7 +315,6 @@ function acquia_cloud_dashboard_report() {
       $report_html .= acquia_cloud_dashboard_get_html_report();
     }
     else {
-      //dsm(variable_get('acquia_cloud_report_html', t('Report Not Generated Yet')));
       $report_html .= variable_get('acquia_cloud_report_html', t('Report Not Generated Yet'));
     }
     return $report_html;
@@ -355,8 +354,10 @@ function acquia_cloud_dashboard_get_html_report() {
       $site_row[] = $value;
       $site_rows[] = $site_row;
     }
-    $site_info_table_html = theme('table', array('header' => array('Parameter', 'Value'),
-      'rows' => $site_rows));
+    $site_info_table_html = theme('table', array(
+      'header' => array('Parameter', 'Value'),
+      'rows' => $site_rows,
+        ));
 
     /*
      * Get the Site SSH Keys.
@@ -373,8 +374,10 @@ function acquia_cloud_dashboard_get_html_report() {
       $site_ssh_row[] = l(t('Delete Key'), "admin/config/cloud-api/delete/key/$site_name/$key_id/$key_nick");
       $site_ssh_keys[] = $site_ssh_row;
     }
-    $site_ssh_table_html .= theme('table', array('header' => array('SSH Key Nick Name', 'SSH Key', 'Delete'),
-      'rows' => $site_ssh_keys));
+    $site_ssh_table_html .= theme('table', array(
+      'header' => array('SSH Key Nick Name', 'SSH Key', 'Delete'),
+      'rows' => $site_ssh_keys,
+        ));
 
 
 
