@@ -8,9 +8,6 @@
 
 /**
  * Implements hook_menu().
- * 
- * @return array
- *   An array of values from hook_menu implementation.
  */
 function acquia_cloud_dashboard_menu() {
   $items['admin/config/cloud-api'] = array(
@@ -49,7 +46,11 @@ function acquia_cloud_dashboard_menu() {
     'title' => 'Acquia Cloud API Add Domains',
     'description' => 'Add Domains on Acquia Cloud',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('acquia_cloud_dashboard_configure_add_domain_form', 5, 6),
+    'page arguments' => array(
+      'acquia_cloud_dashboard_configure_add_domain_form',
+      5,
+      6,
+    ),
     'access arguments' => array('add domains cloud api'),
     'file' => 'acquia_cloud_dashboard.pages.inc',
     'type' => MENU_CALLBACK,
@@ -58,7 +59,12 @@ function acquia_cloud_dashboard_menu() {
     'title' => 'Acquia Cloud API Delete Domains',
     'description' => 'Delete Domains on Acquia Cloud',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('acquia_cloud_dashboard_configure_delete_domain_form', 5, 6, 7),
+    'page arguments' => array(
+      'acquia_cloud_dashboard_configure_delete_domain_form',
+      5,
+      6,
+      7
+    ),
     'access arguments' => array('delete domains cloud api'),
     'file' => 'acquia_cloud_dashboard.pages.inc',
     'type' => MENU_CALLBACK,
@@ -67,7 +73,12 @@ function acquia_cloud_dashboard_menu() {
     'title' => 'Acquia Cloud API Purge Domain Varnish Cache',
     'description' => 'Purge Domain Cache on Acquia Cloud',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('acquia_cloud_dashboard_configure_purge_varnish_form', 5, 6, 7),
+    'page arguments' => array(
+      'acquia_cloud_dashboard_configure_purge_varnish_form',
+      5,
+      6,
+      7,
+    ),
     'access arguments' => array('purge domain cache cloud api'),
     'file' => 'acquia_cloud_dashboard.pages.inc',
     'type' => MENU_CALLBACK,
@@ -85,7 +96,12 @@ function acquia_cloud_dashboard_menu() {
     'title' => 'Acquia Cloud API Delete Domains',
     'description' => 'Delete SSH Key on Acquia Cloud',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('acquia_cloud_dashboard_configure_delete_key_form', 5, 6, 7),
+    'page arguments' => array(
+      'acquia_cloud_dashboard_configure_delete_key_form',
+      5,
+      6,
+      7,
+    ),
     'access arguments' => array('delete key cloud api'),
     'file' => 'acquia_cloud_dashboard.pages.inc',
     'type' => MENU_CALLBACK,
@@ -135,4 +151,3 @@ function acquia_cloud_dashboard_permission() {
     ),
   );
 }
-

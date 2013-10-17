@@ -448,21 +448,19 @@ function acquia_cloud_dashboard_get_html_report() {
           'rows' => $server_rows,
             ));
 
-
         $env_server_row[] = $server_info_table_html;
         $env_servers[] = $env_server_row;
       }
-      $env_servers_table_html = theme('table', array('header' => array('Server', 'Server Info'),
-        'rows' => $env_servers));
-
+      $env_servers_table_html = theme('table', array(
+        'header' => array('Server', 'Server Info'),
+        'rows' => $env_servers,
+          ));
 
       $site_env_row[] = $env_domains_table_html . $env_servers_table_html;
       $site_envs[] = $site_env_row;
     }
     $site_envs_table_html = theme('table', array('header' => array('Environment', 'Environment Details'),
       'rows' => $site_envs));
-
-
 
     /*
      * Get Task List for Site
@@ -503,7 +501,6 @@ function acquia_cloud_dashboard_get_html_report() {
  */
 function acquia_cloud_dashboard_curl_caller($method) {
   $url = "https://cloudapi.acquia.com/v1/" . $method . ".json";
-  //  dsm($url);
   $username = variable_get('acquia_cloud_dashboard_username', "");
   $password = variable_get('acquia_cloud_dashboard_password', "");
   $ch = curl_init($url);
@@ -535,7 +532,7 @@ function acquia_cloud_dashboard_curl_caller_post($method, $request = "POST", $bi
 
   curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
 
-  //set the url, number of POST vars, POST data
+  // Set the url, number of POST vars, POST data.
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_setopt($ch, CURLOPT_POST, 0);
   curl_setopt($ch, CURLOPT_POSTFIELDS, drupal_json_encode($post_data));
