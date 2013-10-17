@@ -3,5 +3,3 @@ description = Allows Drupal to securely communicate with the Acquia Cloud API. C
 package = Acquia Network Connector
 core = 7.x
 configure = admin/config/cloud-api/configure
-files[] = acquia_cloud_dashboard.module
-files[] = acquia_cloud_dashboard.pages.inc

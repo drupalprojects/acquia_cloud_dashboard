@@ -2,12 +2,15 @@
 
 /**
  * @file
- *   Acquia Cloud API module provides an interfact to manage your Acquia Hosting
- *   from your Drupal Site.
+ * Acquia Cloud API module provides an interfact to manage your Acquia Hosting
+ * from your Drupal Site.
  */
 
 /**
  * Implements hook_menu().
+ * 
+ * @return array
+ *   An array of values from hook_menu implementation.
  */
 function acquia_cloud_dashboard_menu() {
   $items['admin/config/cloud-api'] = array(
@@ -92,6 +95,9 @@ function acquia_cloud_dashboard_menu() {
 
 /**
  * Implements hook_permission().
+ * 
+ * @return array
+ *   An array of values from hook_permission implementation.
  */
 function acquia_cloud_dashboard_permission() {
   return array(
