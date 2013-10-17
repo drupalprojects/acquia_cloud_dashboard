@@ -63,7 +63,7 @@ function acquia_cloud_dashboard_menu() {
       'acquia_cloud_dashboard_configure_delete_domain_form',
       5,
       6,
-      7
+      7,
     ),
     'access arguments' => array('delete domains cloud api'),
     'file' => 'acquia_cloud_dashboard.pages.inc',
@@ -111,9 +111,6 @@ function acquia_cloud_dashboard_menu() {
 
 /**
  * Implements hook_permission().
- * 
- * @return array
- *   An array of values from hook_permission implementation.
  */
 function acquia_cloud_dashboard_permission() {
   return array(

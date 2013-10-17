@@ -459,8 +459,10 @@ function acquia_cloud_dashboard_get_html_report() {
       $site_env_row[] = $env_domains_table_html . $env_servers_table_html;
       $site_envs[] = $site_env_row;
     }
-    $site_envs_table_html = theme('table', array('header' => array('Environment', 'Environment Details'),
-      'rows' => $site_envs));
+    $site_envs_table_html = theme('table', array(
+      'header' => array('Environment', 'Environment Details'),
+      'rows' => $site_envs,
+        ));
 
     /*
      * Get Task List for Site
