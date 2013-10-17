@@ -379,8 +379,6 @@ function acquia_cloud_dashboard_get_html_report() {
       'rows' => $site_ssh_keys,
         ));
 
-
-
     /*
      * Get the Site DBs
      */
@@ -391,8 +389,10 @@ function acquia_cloud_dashboard_get_html_report() {
       $site_db_row[] = $value['name'];
       $site_dbs[] = $site_db_row;
     }
-    $site_dbs_table_html = theme('table', array('header' => array('Databases'),
-      'rows' => $site_dbs));
+    $site_dbs_table_html = theme('table', array(
+      'header' => array('Databases'),
+      'rows' => $site_dbs,
+        ));
 
     /*
      * Get the Environments
@@ -417,8 +417,10 @@ function acquia_cloud_dashboard_get_html_report() {
         $env_domain_row[] = l(t('Purge Varnish Cache'), "admin/config/cloud-api/purge/domain/$site_name/$env/$domain_name");
         $env_domains[] = $env_domain_row;
       }
-      $env_domains_table_html .= theme('table', array('header' => array('Domain', 'Delete', 'Purge Varnish'),
-        'rows' => $env_domains));
+      $env_domains_table_html .= theme('table', array(
+        'header' => array('Domain', 'Delete', 'Purge Varnish'),
+        'rows' => $env_domains,
+          ));
 
       /*
        * For each Env, get the servers
@@ -441,8 +443,10 @@ function acquia_cloud_dashboard_get_html_report() {
           $server_row[] = $value;
           $server_rows[] = $server_row;
         }
-        $server_info_table_html = theme('table', array('header' => array('Parameter', 'Value'),
-          'rows' => $server_rows));
+        $server_info_table_html = theme('table', array(
+          'header' => array('Parameter', 'Value'),
+          'rows' => $server_rows,
+            ));
 
 
         $env_server_row[] = $server_info_table_html;
@@ -474,8 +478,10 @@ function acquia_cloud_dashboard_get_html_report() {
       $task_row[] = $value['description'];
       $task_rows[] = $task_row;
     }
-    $site_tasks_table_html = theme('table', array('header' => array('Time Started', 'Status', 'Task Details'),
-      'rows' => $task_rows));
+    $site_tasks_table_html = theme('table', array(
+      'header' => array('Time Started', 'Status', 'Task Details'),
+      'rows' => $task_rows,
+        ));
 
     /*
      * Join the report
@@ -484,8 +490,6 @@ function acquia_cloud_dashboard_get_html_report() {
 
     $rows[] = $row;
   }
-
-
 
   $report_html .= theme('table', array('header' => $header, 'rows' => $rows));
   variable_set('acquia_cloud_last_report_generated_time', REQUEST_TIME);
@@ -538,7 +542,7 @@ function acquia_cloud_dashboard_curl_caller_post($method, $request = "POST", $bi
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $request);
   if ($binary) {
-    curl_setopt($ch, CURLOPT_BINARYTRANSFER, TRUE); // --data-binary
+    curl_setopt($ch, CURLOPT_BINARYTRANSFER, TRUE);
   }
 
   $result = curl_exec($ch);
