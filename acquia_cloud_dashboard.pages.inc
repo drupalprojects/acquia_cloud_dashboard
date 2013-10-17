@@ -38,10 +38,10 @@ function acquia_cloud_dashboard_configure_form() {
     '#required' => TRUE,
   );
 
-  $form['acquia_cloud_no_of_tasks'] = array(
+  $form['acquia_cloud_dashboard_no_of_tasks'] = array(
     '#type' => 'textfield',
     '#title' => t('Number of recent tasks from tasklist to show'),
-    '#default_value' => variable_get('acquia_cloud_no_of_tasks', 25),
+    '#default_value' => variable_get('acquia_cloud_dashboard_no_of_tasks', 25),
     '#description' => t('Show the latest tasks from Task List, as seen on your Workflow page on Dashboard'),
     '#size' => '5',
     '#required' => TRUE,
@@ -468,7 +468,7 @@ function acquia_cloud_dashboard_get_html_report() {
      * Get Task List for Site
      */
     $task_list_raw = acquia_cloud_dashboard_curl_caller("sites/$site_name/tasks");
-    $no_of_tasks = variable_get('acquia_cloud_no_of_tasks', 25);
+    $no_of_tasks = variable_get('acquia_cloud_dashboard_no_of_tasks', 25);
     $tasks_array_trimmed = array_reverse(array_slice($task_list_raw, -$no_of_tasks));
     $task_rows = array();
     foreach ($tasks_array_trimmed as $key => $value) {
