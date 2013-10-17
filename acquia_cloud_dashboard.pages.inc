@@ -11,28 +11,28 @@
 function acquia_cloud_dashboard_configure_form() {
   $form = array();
 
-  $form['acquia_cloud_username'] = array(
+  $form['acquia_cloud_dashboard_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Acquia Cloud Username'),
-    '#default_value' => variable_get('acquia_cloud_username', ''),
+    '#default_value' => variable_get('acquia_cloud_dashboard_username', ''),
     '#description' => t('Enter your cloud username as shown on http://network.acquia.com'),
     '#size' => '40',
     '#required' => TRUE,
   );
 
-  $form['acquia_cloud_password'] = array(
+  $form['acquia_cloud_dashboard_password'] = array(
     '#type' => 'textfield',
     '#title' => t('Acquia Cloud Password'),
-    '#default_value' => variable_get('acquia_cloud_password', ''),
+    '#default_value' => variable_get('acquia_cloud_dashboard_password', ''),
     '#description' => t('Enter your cloud password as shown on http://network.acquia.com'),
     '#size' => '40',
     '#required' => TRUE,
   );
 
-  $form['acquia_cloud_refresh_interval'] = array(
+  $form['acquia_cloud_dashboard_refresh_interval'] = array(
     '#type' => 'textfield',
     '#title' => t('Report Refresh Interval (seconds)'),
-    '#default_value' => variable_get('acquia_cloud_refresh_interval', 3600),
+    '#default_value' => variable_get('acquia_cloud_dashboard_refresh_interval', 3600),
     '#description' => t('Enter the time interval at which the report should be refreshed.'),
     '#size' => '5',
     '#required' => TRUE,
@@ -306,12 +306,12 @@ function acquia_cloud_dashboard_report_refresh() {
  * Page call back that returns the report markup.
  */
 function acquia_cloud_dashboard_report() {
-  if (variable_get('acquia_cloud_username', "") != "") {
+  if (variable_get('acquia_cloud_dashboard_username', "") != "") {
     $report_html = t('<b>Report was last updated !time_ago ago</b><br/>', array('!time_ago' => format_interval(REQUEST_TIME - variable_get('acquia_cloud_last_report_generated_time'))));
     $report_html .= l(t('Refresh Report'), 'admin/config/cloud-api/refresh');
 
     $time_last_run = variable_get('acquia_cloud_last_report_generated_time', 0);
-    if (time() - $time_last_run > variable_get('acquia_cloud_refresh_interval', 3600)) {
+    if (time() - $time_last_run > variable_get('acquia_cloud_dashboard_refresh_interval', 3600)) {
       $report_html .= acquia_cloud_dashboard_get_html_report();
     }
     else {
@@ -504,8 +504,8 @@ function acquia_cloud_dashboard_get_html_report() {
 function acquia_cloud_dashboard_curl_caller($method) {
   $url = "https://cloudapi.acquia.com/v1/" . $method . ".json";
   //  dsm($url);
-  $username = variable_get('acquia_cloud_username', "");
-  $password = variable_get('acquia_cloud_password', "");
+  $username = variable_get('acquia_cloud_dashboard_username', "");
+  $password = variable_get('acquia_cloud_dashboard_password', "");
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -529,8 +529,8 @@ function acquia_cloud_dashboard_curl_caller_post($method, $request = "POST", $bi
       $url .= ("$en_key=$en_val&");
     }
   }
-  $username = variable_get('acquia_cloud_username', "");
-  $password = variable_get('acquia_cloud_password', "");
+  $username = variable_get('acquia_cloud_dashboard_username', "");
+  $password = variable_get('acquia_cloud_dashboard_password', "");
   $ch = curl_init();
 
   curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
@@ -545,7 +545,7 @@ function acquia_cloud_dashboard_curl_caller_post($method, $request = "POST", $bi
     curl_setopt($ch, CURLOPT_BINARYTRANSFER, TRUE);
   }
 
-  $result = curl_exec($ch);
+  curl_exec($ch);
   curl_close($ch);
   drupal_set_message(t('Command Sent to Cloud API'));
 }
