@@ -11,11 +11,21 @@
  */
 function acquia_cloud_api_menu() {
   $items['admin/config/cloud-api'] = array(
+    'title' => 'Acquia Cloud Dashboard',
+    'description' => 'Control Acquia Cloud Hosting right from Drupal Site',
+    'position' => 'left',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access cloud api report'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/config/cloud-api/view'] = array(
     'title' => 'Acquia Cloud API Report',
     'description' => 'Report of your Acquia Cloud',
     'page callback' => 'acquia_cloud_api_report',
     'access arguments' => array('access cloud api report'),
     'file' => 'acquia_cloud_api.pages.inc',
+    'type' => MENU_NORMAL_ITEM,
   );
   $items['admin/config/cloud-api/refresh'] = array(
     'title' => 'Refresh Acquia Cloud API Report',

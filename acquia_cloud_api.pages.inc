@@ -131,7 +131,7 @@ function acquia_cloud_api_configure_add_key_form_submit($form, &$form_state) {
   $key_key = $form_state['values']['acquia_cloud_key_key'];
 
   acquia_cloud_curl_caller_post("sites/$site_name/sshkeys", "POST", TRUE, array('ssh_pub_key' => $key_key), array('nickname' => $key_nick));
-  drupal_goto('admin/config/cloud-api');
+  drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
@@ -260,7 +260,7 @@ function acquia_cloud_api_configure_delete_key_form_submit($form, &$form_state) 
   $key_id = $form_state['values']['acquia_cloud_key_id'];
 
   acquia_cloud_curl_caller_post("sites/$site_name/sshkeys/$key_id", "DELETE");
-  drupal_goto('admin/config/cloud-api');
+  drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
@@ -272,7 +272,7 @@ function acquia_cloud_api_configure_add_domain_form_submit($form, &$form_state) 
   $domain_name = $form_state['values']['acquia_cloud_domain_domain'];
 
   acquia_cloud_curl_caller_post("sites/$site_name/envs/$env/domains/$domain_name");
-  drupal_goto('admin/config/cloud-api');
+  drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
@@ -284,7 +284,7 @@ function acquia_cloud_api_configure_delete_domain_form_submit($form, &$form_stat
   $domain_name = $form_state['values']['acquia_cloud_domain_domain'];
 
   acquia_cloud_curl_caller_post("sites/$site_name/envs/$env/domains/$domain_name", "DELETE");
-  drupal_goto('admin/config/cloud-api');
+  drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
@@ -296,7 +296,7 @@ function acquia_cloud_api_configure_purge_varnish_form_submit($form, &$form_stat
   $domain_name = $form_state['values']['acquia_cloud_purge_domain_domain'];
 
   acquia_cloud_curl_caller_post("sites/$site_name/envs/$env/domains/$domain_name/cache", "DELETE");
-  drupal_goto('admin/config/cloud-api');
+  drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
@@ -304,26 +304,32 @@ function acquia_cloud_api_configure_purge_varnish_form_submit($form, &$form_stat
  */
 function acquia_cloud_api_report_refresh() {
   acquia_cloud_get_html_report();
-  drupal_goto('admin/config/cloud-api');
+  drupal_set_message(t('Cloud Status Report has been refreshed'), 'warning');
+  drupal_goto('admin/config/cloud-api/view');
 }
 
 /**
  *  Page call back that returns the report markup
  */
 function acquia_cloud_api_report() {
+  if (variable_get('acquia_cloud_username', "") != "") {
+    $report_html = t('<b>Report was last updated !time_ago ago</b><br/>', array('!time_ago' => format_interval(REQUEST_TIME - variable_get('acquia_cloud_last_report_generated_time'))));
+    $report_html .= l(t('Refresh Report'), 'admin/config/cloud-api/refresh');
 
-  $report_html = t('<b>Report was last updated !time_ago ago</b><br/>', array('!time_ago' => format_interval(REQUEST_TIME - variable_get('acquia_cloud_last_report_generated_time'))));
-  $report_html .= l(t('Refresh Report'), 'admin/config/cloud-api/refresh');
-
-  $time_last_run = variable_get('acquia_cloud_last_report_generated_time', 0);
-  if (time() - $time_last_run > variable_get('acquia_cloud_refresh_interval', 3600)) {
-    $report_html .= acquia_cloud_get_html_report();
+    $time_last_run = variable_get('acquia_cloud_last_report_generated_time', 0);
+    if (time() - $time_last_run > variable_get('acquia_cloud_refresh_interval', 3600)) {
+      $report_html .= acquia_cloud_get_html_report();
+    }
+    else {
+      //dsm(variable_get('acquia_cloud_report_html', t('Report Not Generated Yet')));
+      $report_html .= variable_get('acquia_cloud_report_html', t('Report Not Generated Yet'));
+    }
+    return $report_html;
   }
   else {
-    //dsm(variable_get('acquia_cloud_report_html', t('Report Not Generated Yet')));
-    $report_html .= variable_get('acquia_cloud_report_html', t('Report Not Generated Yet'));
+    drupal_set_message(t('Please configure your Cloud API credentials.'), 'warning');
+    drupal_goto('admin/config/cloud-api/configure');
   }
-  return $report_html;
 }
 
 /**

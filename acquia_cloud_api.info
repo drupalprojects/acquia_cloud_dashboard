@@ -2,6 +2,6 @@ name = Acquia Cloud Dashboard
 description = Allows Drupal to securely communicate with the Acquia Cloud API. Currently Lists all the data about Domains, Servers and Environments.
 package = Acquia Network Connector
 core = 7.x
-configure = admin/config/system/acquia-cloud-api
+configure = admin/config/cloud-api/configure
 files[] = acquia_cloud_api.module
 files[] = acquia_cloud_api.pages.inc
