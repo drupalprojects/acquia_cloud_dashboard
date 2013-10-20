@@ -663,6 +663,9 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
   variable_set('acquia_cloud_report_html', $report_html);
 }
 
+/**
+ * Helper function showing the batch report generation completion.
+ */
 function acquia_cloud_dashboard_update_finished($success, $results, $operations) {
   drupal_set_message(t('Cloud Status Report has been refreshed'));
 }
