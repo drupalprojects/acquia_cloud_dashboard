@@ -348,7 +348,7 @@ function acquia_cloud_dashboard_update_sites(&$context) {
   $context['message'] = t('Refreshing sites list.');
   $sites_data = acquia_cloud_dashboard_curl_caller("sites");
   $site_names = array();
-  foreach ($sites_data as $key => $value) {
+  foreach ($sites_data as $value) {
     $site_raw_name = explode(':', $value);
 
     // Fetch the site info.
