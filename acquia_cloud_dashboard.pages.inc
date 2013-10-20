@@ -53,7 +53,7 @@ function acquia_cloud_dashboard_configure_form() {
 /**
  * Domain addition form function.
  */
-function acquia_cloud_dashboard_configure_add_domain_form($form_state, $form, $site_name, $env) {
+function acquia_cloud_dashboard_configure_add_domain_form($form, &$form_state, $site_name, $env) {
   $form = array();
   $form['acquia_cloud_domain_site'] = array(
     '#type' => 'textfield',
@@ -89,7 +89,7 @@ function acquia_cloud_dashboard_configure_add_domain_form($form_state, $form, $s
 /**
  * SSH Key addition form function.
  */
-function acquia_cloud_dashboard_configure_add_key_form($form_state, $form, $site_name) {
+function acquia_cloud_dashboard_configure_add_key_form($form, &$form_state, $site_name) {
   $form = array();
   $form['acquia_cloud_key_site'] = array(
     '#type' => 'textfield',
@@ -134,7 +134,7 @@ function acquia_cloud_dashboard_configure_add_key_form_submit($form, &$form_stat
 /**
  * Delete Domain Form function.
  */
-function acquia_cloud_dashboard_configure_delete_domain_form($form_state, $form, $site_name, $env, $domain) {
+function acquia_cloud_dashboard_configure_delete_domain_form($form, &$form_state, $site_name, $env, $domain) {
   $form = array();
   $form['acquia_cloud_domain_site'] = array(
     '#type' => 'textfield',
@@ -172,7 +172,7 @@ function acquia_cloud_dashboard_configure_delete_domain_form($form_state, $form,
 /**
  * Purge Cache form function.
  */
-function acquia_cloud_dashboard_configure_purge_varnish_form($form_state, $form, $site_name, $env, $domain) {
+function acquia_cloud_dashboard_configure_purge_varnish_form($form, &$form_state, $site_name, $env, $domain) {
   $form = array();
   $form['acquia_cloud_purge_domain_site'] = array(
     '#type' => 'textfield',
@@ -210,7 +210,7 @@ function acquia_cloud_dashboard_configure_purge_varnish_form($form_state, $form,
 /**
  * Delete SSH Key form function.
  */
-function acquia_cloud_dashboard_configure_delete_key_form($form_state, $form, $site_name, $keyid, $key_nick) {
+function acquia_cloud_dashboard_configure_delete_key_form($form, &$form_state, $site_name, $keyid, $key_nick) {
   $form = array();
   $form['acquia_cloud_key_site'] = array(
     '#type' => 'textfield',
