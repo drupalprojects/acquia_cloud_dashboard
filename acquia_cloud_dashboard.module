@@ -29,7 +29,7 @@ function acquia_cloud_dashboard_menu() {
   );
   $items['admin/config/cloud-api/refresh'] = array(
     'title' => 'Refresh Acquia Cloud API Report',
-    'description' => 'Refreshses your Acquia Cloud',
+    'description' => 'Refreshes your Acquia Cloud',
     'page callback' => 'acquia_cloud_dashboard_report_refresh',
     'access arguments' => array('refresh cloud api report'),
     'file' => 'acquia_cloud_dashboard.pages.inc',
