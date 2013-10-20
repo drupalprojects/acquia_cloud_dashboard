@@ -341,6 +341,9 @@ function acquia_cloud_dashboard_report() {
   }
 }
 
+/**
+ * Helper function for the batch to update sites info.
+ */
 function acquia_cloud_dashboard_update_sites(&$context) {
   $context['message'] = t('Refreshing sites list.');
   $sites_data = acquia_cloud_dashboard_curl_caller("sites");
@@ -359,6 +362,9 @@ function acquia_cloud_dashboard_update_sites(&$context) {
   $context['results']['sites'] = $site_names;
 }
 
+/**
+ * Helper function for the batch to update ssh keys info.
+ */
 function acquia_cloud_dashboard_update_ssh_keys(&$context) {
   if (empty($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
@@ -386,6 +392,9 @@ function acquia_cloud_dashboard_update_ssh_keys(&$context) {
   }
 }
 
+/**
+ * Helper function for the batch to update db info.
+ */
 function acquia_cloud_dashboard_update_dbs(&$context) {
   if (empty($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
@@ -410,6 +419,9 @@ function acquia_cloud_dashboard_update_dbs(&$context) {
   }
 }
 
+/**
+ * Helper function for the batch to update environments info.
+ */
 function acquia_cloud_dashboard_update_environments(&$context) {
   if (empty($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
@@ -457,6 +469,9 @@ function acquia_cloud_dashboard_update_environments(&$context) {
   }
 }
 
+/**
+ * Helper function for the batch to update tasks info.
+ */
 function acquia_cloud_dashboard_update_tasks(&$context) {
   if (empty($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
