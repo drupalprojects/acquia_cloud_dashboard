@@ -126,7 +126,7 @@ function acquia_cloud_dashboard_configure_add_key_form($form, &$form_state, $sit
 }
 
 /**
- * Custom Submit Handler to the settings page. Unsets the incorrect creds flag
+ * Custom Submit Handler to the settings page. Unsets the incorrect creds flag.
  */
 function acquia_cloud_dashboard_configure_form_submit_set_unset_incorrect_creds_flag($form, &$form_state) {
   variable_set('acquia_cloud_dashboard_incorrect_creds_flag', 0);
