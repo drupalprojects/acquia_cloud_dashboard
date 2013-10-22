@@ -18,6 +18,7 @@ function acquia_cloud_dashboard_configure_form() {
     '#description' => t('Enter your cloud username as shown on http://network.acquia.com'),
     '#size' => '40',
     '#required' => TRUE,
+    '#attributes' => array('autocomplete' => 'off'),
   );
 
   $form['acquia_cloud_dashboard_password'] = array(
@@ -27,6 +28,7 @@ function acquia_cloud_dashboard_configure_form() {
     '#description' => t('Enter your cloud password as shown on http://network.acquia.com'),
     '#size' => '40',
     '#required' => TRUE,
+    '#attributes' => array('autocomplete' => 'off'),
   );
 
   $form['acquia_cloud_dashboard_refresh_interval'] = array(
@@ -323,15 +325,15 @@ function acquia_cloud_dashboard_report_refresh() {
  */
 function acquia_cloud_dashboard_report() {
   if (variable_get('acquia_cloud_dashboard_username', "") != "") {
-    $report_html = t('<b>Report was last updated !time_ago ago</b><br/>', array('!time_ago' => format_interval(REQUEST_TIME - variable_get('acquia_cloud_last_report_generated_time'))));
+    $report_html = t('<b>Report was last updated !time_ago ago</b><br/>', array('!time_ago' => format_interval(REQUEST_TIME - variable_get('acquia_cloud_dashboard_last_report_generated_time'))));
     $report_html .= l(t('Refresh Report'), 'admin/config/cloud-api/refresh');
 
-    $time_last_run = variable_get('acquia_cloud_last_report_generated_time', 0);
+    $time_last_run = variable_get('acquia_cloud_dashboard_last_report_generated_time', 0);
     if (time() - $time_last_run > variable_get('acquia_cloud_dashboard_refresh_interval', 3600)) {
       acquia_cloud_dashboard_report_refresh();
     }
     else {
-      $report_html .= variable_get('acquia_cloud_report_html', t('Report Not Generated Yet'));
+      $report_html .= variable_get('acquia_cloud_dashboard_report_html', t('Report Not Generated Yet'));
     }
     return $report_html;
   }
@@ -658,9 +660,9 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
 
   $report_html .= theme('table', array('header' => $header, 'rows' => $rows));
 
-  variable_set('acquia_cloud_report_raw', $context['results']);
-  variable_set('acquia_cloud_last_report_generated_time', REQUEST_TIME);
-  variable_set('acquia_cloud_report_html', $report_html);
+  variable_set('acquia_cloud_dashboard_report_raw', $context['results']);
+  variable_set('acquia_cloud_dashboard_last_report_generated_time', REQUEST_TIME);
+  variable_set('acquia_cloud_dashboard_report_html', $report_html);
 }
 
 /**
