@@ -346,7 +346,15 @@ function acquia_cloud_dashboard_report() {
     $report_html .= l(t('Refresh Report'), 'admin/config/cloud-api/refresh');
 
     $time_last_run = variable_get('acquia_cloud_dashboard_last_report_generated_time', 0);
-    if (time() - $time_last_run > variable_get('acquia_cloud_dashboard_refresh_interval', 3600)) {
+    
+    $time_elapsed_more_than_threshold = (time() - $time_last_run > variable_get('acquia_cloud_dashboard_refresh_interval', 3600) ? 1:0);
+    
+    /*
+     * Run the report only if
+     * Time elapsed is more than the thresold defined in settings and
+     * The incorrect credentials flag is NOT set.
+     */
+    if ($time_elapsed_more_than_threshold && !variable_get('acquia_cloud_dashboard_incorrect_creds_flag',0)) {
       acquia_cloud_dashboard_report_refresh();
     }
     else {
