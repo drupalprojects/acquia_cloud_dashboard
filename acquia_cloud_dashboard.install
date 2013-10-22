@@ -17,4 +17,6 @@ function acquia_cloud_dashboard_uninstall() {
   variable_del('acquia_cloud_dashboard_refresh_');
   variable_del('acquia_cloud_dashboard_username');
   variable_del('acquia_cloud_dashboard_incorrect_creds');
+  variable_del('acquia_cloud_dashboard_refresh_interval');
+  variable_del('acquia_cloud_dashboard_incorrect_creds_flag');
 }

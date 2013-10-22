@@ -310,6 +310,10 @@ function acquia_cloud_dashboard_configure_purge_varnish_form_submit($form, &$for
  * Helper function to manually refresh api report page.
  */
 function acquia_cloud_dashboard_report_refresh() {
+  /*
+   * Initialise the batch operation and define the functions that would be
+   * called in the operation.
+   */
   $batch = array(
     'title' => t('Refreshing Cloud API Dashboard...'),
     'operations' => array(
@@ -335,7 +339,9 @@ function acquia_cloud_dashboard_report_refresh() {
  * Page call back that returns the report markup.
  */
 function acquia_cloud_dashboard_report() {
+  //Check and proceed only if configured.
   if (variable_get('acquia_cloud_dashboard_username', "") != "") {
+    //Append the Last Updated Timestamp to show on report.
     $report_html = t('<b>Report was last updated !time_ago ago</b><br/>', array('!time_ago' => format_interval(REQUEST_TIME - variable_get('acquia_cloud_dashboard_last_report_generated_time'))));
     $report_html .= l(t('Refresh Report'), 'admin/config/cloud-api/refresh');
 
@@ -346,12 +352,20 @@ function acquia_cloud_dashboard_report() {
     else {
       $report_html .= variable_get('acquia_cloud_dashboard_report_html', t('Report Not Generated Yet'));
     }
+    /*
+     * If there was an error in communicating with API, then a flag is set.
+     * Checking for the flag here and showing a message.
+     */
     if (variable_get('acquia_cloud_dashboard_incorrect_creds_flag', 0)) {
       drupal_set_message(t('Your cloud credentials look incorrect. Corrrect them on the  <a href="@config">settings page</a>.', array('@config' => url('admin/config/cloud-api/configure'))), 'error');
     }
     return $report_html;
   }
   else {
+    /*
+     * If the cloud API creds were never configured, redirecting user to config
+     * page.
+     */
     drupal_set_message(t('Please configure your Cloud API credentials.'), 'warning');
     drupal_goto('admin/config/cloud-api/configure');
   }
@@ -363,6 +377,7 @@ function acquia_cloud_dashboard_report() {
 function acquia_cloud_dashboard_update_sites(&$context) {
   $context['message'] = t('Refreshing sites list.');
   $sites_data = acquia_cloud_dashboard_curl_caller("sites");
+  //Proceed only if creds are a match. Else set a flag.
   if ($sites_data['message'] != NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API) {
     $site_names = array();
     foreach ($sites_data as $value) {
