@@ -4,6 +4,7 @@
  * @file
  * The configuration and report pages of Acquia Cloud API
  */
+define("NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API", "Not authorized");
 
 /**
  * Acquia Cloud API settings form.
@@ -49,7 +50,9 @@ function acquia_cloud_dashboard_configure_form() {
     '#required' => TRUE,
   );
 
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+  $form['#submit'][] = 'acquia_cloud_dashboard_configure_form_submit_set_unset_incorrect_creds_flag';
+  return($form);
 }
 
 /**
@@ -119,6 +122,13 @@ function acquia_cloud_dashboard_configure_add_key_form($form, &$form_state, $sit
   );
 
   return $form;
+}
+
+/**
+ * Submit handler to add ssh-key form.
+ */
+function acquia_cloud_dashboard_configure_form_submit_set_unset_incorrect_creds_flag($form, &$form_state) {
+  variable_set('acquia_cloud_dashboard_incorrect_creds_flag', 0);
 }
 
 /**
@@ -335,6 +345,9 @@ function acquia_cloud_dashboard_report() {
     else {
       $report_html .= variable_get('acquia_cloud_dashboard_report_html', t('Report Not Generated Yet'));
     }
+    if (variable_get('acquia_cloud_dashboard_incorrect_creds_flag', 0)) {
+      drupal_set_message(t('Your cloud credentials look incorrect. Corrrect them on the  <a href="@config">settings page</a>.', array('@config' => url('admin/config/cloud-api/configure'))), 'error');
+    }
     return $report_html;
   }
   else {
@@ -349,48 +362,56 @@ function acquia_cloud_dashboard_report() {
 function acquia_cloud_dashboard_update_sites(&$context) {
   $context['message'] = t('Refreshing sites list.');
   $sites_data = acquia_cloud_dashboard_curl_caller("sites");
-  $site_names = array();
-  foreach ($sites_data as $value) {
-    $site_raw_name = explode(':', $value);
+  if ($sites_data['message'] != NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API) {
+    $site_names = array();
+    foreach ($sites_data as $value) {
+      $site_raw_name = explode(':', $value);
 
-    // Fetch the site info.
-    $site_info_array = acquia_cloud_dashboard_curl_caller("sites/" . $site_raw_name[1]);
-    $site_names[] = array(
-      'name' => $site_raw_name[1],
-      'info' => $site_info_array,
-    );
+      // Fetch the site info.
+      $site_info_array = acquia_cloud_dashboard_curl_caller("sites/" . $site_raw_name[1]);
+      $site_names[] = array(
+        'name' => $site_raw_name[1],
+        'info' => $site_info_array,
+      );
+    }
+
+    $context['results']['sites'] = $site_names;
   }
-
-  $context['results']['sites'] = $site_names;
+  else {
+    $context['results']['sites'] = array();
+    variable_set('acquia_cloud_dashboard_incorrect_creds_flag', 1);
+  }
 }
 
 /**
  * Helper function for the batch to update ssh keys info.
  */
 function acquia_cloud_dashboard_update_ssh_keys(&$context) {
-  if (empty($context['sandbox']['progress'])) {
-    $context['sandbox']['progress'] = 0;
-    $context['sandbox']['current'] = 0;
-    $context['sandbox']['max'] = count($context['results']['sites']);
-  }
-  $progress = $context['sandbox']['progress'];
-  $site_name = $context['results']['sites'][$progress]['name'];
-  $context['message'] = t('Refreshing SSH keys for @site', array('@site' => $site_name));
+  if (count($context['results']['sites'])) {
+    if (empty($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+      $context['sandbox']['current'] = 0;
+      $context['sandbox']['max'] = count($context['results']['sites']);
+    }
+    $progress = $context['sandbox']['progress'];
+    $site_name = $context['results']['sites'][$progress]['name'];
+    $context['message'] = t('Refreshing SSH keys for @site', array('@site' => $site_name));
 
-  $site_ssh_keys_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/sshkeys");
-  $site_ssh_keys = array();
-  foreach ($site_ssh_keys_array as $ssh_key) {
-    $site_ssh_keys[] = array(
-      'id' => $ssh_key['id'],
-      'nickname' => $ssh_key['nickname'],
-      'public' => $ssh_key['ssh_pub_key'],
-    );
-  }
-  $context['results']['ssh_keys'][$site_name] = $site_ssh_keys;
-  $context['sandbox']['progress']++;
+    $site_ssh_keys_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/sshkeys");
+    $site_ssh_keys = array();
+    foreach ($site_ssh_keys_array as $ssh_key) {
+      $site_ssh_keys[] = array(
+        'id' => $ssh_key['id'],
+        'nickname' => $ssh_key['nickname'],
+        'public' => $ssh_key['ssh_pub_key'],
+      );
+    }
+    $context['results']['ssh_keys'][$site_name] = $site_ssh_keys;
+    $context['sandbox']['progress']++;
 
-  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+      $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    }
   }
 }
 
@@ -398,26 +419,28 @@ function acquia_cloud_dashboard_update_ssh_keys(&$context) {
  * Helper function for the batch to update db info.
  */
 function acquia_cloud_dashboard_update_dbs(&$context) {
-  if (empty($context['sandbox']['progress'])) {
-    $context['sandbox']['progress'] = 0;
-    $context['sandbox']['current'] = 0;
-    $context['sandbox']['max'] = count($context['results']['sites']);
-  }
-  $progress = $context['sandbox']['progress'];
-  $site_name = $context['results']['sites'][$progress]['name'];
-  $context['message'] = t('Refreshing databases for @site', array('@site' => $site_name));
+  if (count($context['results']['sites'])) {
+    if (empty($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+      $context['sandbox']['current'] = 0;
+      $context['sandbox']['max'] = count($context['results']['sites']);
+    }
+    $progress = $context['sandbox']['progress'];
+    $site_name = $context['results']['sites'][$progress]['name'];
+    $context['message'] = t('Refreshing databases for @site', array('@site' => $site_name));
 
-  $site_databases_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/dbs");
-  $site_dbs = array();
-  foreach ($site_databases_array as $database) {
-    $site_dbs[] = $database['name'];
-  }
+    $site_databases_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/dbs");
+    $site_dbs = array();
+    foreach ($site_databases_array as $database) {
+      $site_dbs[] = $database['name'];
+    }
 
-  $context['results']['dbs'][$site_name] = $site_dbs;
-  $context['sandbox']['progress']++;
+    $context['results']['dbs'][$site_name] = $site_dbs;
+    $context['sandbox']['progress']++;
 
-  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+      $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    }
   }
 }
 
@@ -425,49 +448,51 @@ function acquia_cloud_dashboard_update_dbs(&$context) {
  * Helper function for the batch to update environments info.
  */
 function acquia_cloud_dashboard_update_environments(&$context) {
-  if (empty($context['sandbox']['progress'])) {
-    $context['sandbox']['progress'] = 0;
-    $context['sandbox']['current'] = 0;
-    $context['sandbox']['max'] = count($context['results']['sites']);
-  }
-  $progress = $context['sandbox']['progress'];
-  $site_name = $context['results']['sites'][$progress]['name'];
-  $context['message'] = t('Refreshing environment details for @site', array('@site' => $site_name));
+  if (count($context['results']['sites'])) {
+    if (empty($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+      $context['sandbox']['current'] = 0;
+      $context['sandbox']['max'] = count($context['results']['sites']);
+    }
+    $progress = $context['sandbox']['progress'];
+    $site_name = $context['results']['sites'][$progress]['name'];
+    $context['message'] = t('Refreshing environment details for @site', array('@site' => $site_name));
 
-  $site_envs_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs");
-  $site_envs = array();
-  foreach ($site_envs_array as $environment) {
-    $env = $environment['name'];
+    $site_envs_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs");
+    $site_envs = array();
+    foreach ($site_envs_array as $environment) {
+      $env = $environment['name'];
 
-    // Fetch the domains associated with this environment.
-    $env_domains_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs/$env/domains");
-    $env_domains = array();
-    foreach ($env_domains_array as $domain) {
-      $env_domains[] = $domain['name'];
+      // Fetch the domains associated with this environment.
+      $env_domains_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs/$env/domains");
+      $env_domains = array();
+      foreach ($env_domains_array as $domain) {
+        $env_domains[] = $domain['name'];
+      }
+
+      // Fetch the servers associated with this environment.
+      $env_servers_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs/$env/servers");
+      $env_servers = array();
+      foreach ($env_servers_array as $server) {
+        $server_name = $server['name'];
+
+        // Fetch the server info.
+        $server_info_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs/$env/servers/$server_name");
+        $env_servers[$server_name] = $server_info_array;
+      }
+
+      $site_envs[$env] = array(
+        'domains' => $env_domains,
+        'servers' => $env_servers,
+      );
     }
 
-    // Fetch the servers associated with this environment.
-    $env_servers_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs/$env/servers");
-    $env_servers = array();
-    foreach ($env_servers_array as $server) {
-      $server_name = $server['name'];
+    $context['results']['environments'][$site_name] = $site_envs;
+    $context['sandbox']['progress']++;
 
-      // Fetch the server info.
-      $server_info_array = acquia_cloud_dashboard_curl_caller("sites/$site_name/envs/$env/servers/$server_name");
-      $env_servers[$server_name] = $server_info_array;
+    if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+      $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
     }
-
-    $site_envs[$env] = array(
-      'domains' => $env_domains,
-      'servers' => $env_servers,
-    );
-  }
-
-  $context['results']['environments'][$site_name] = $site_envs;
-  $context['sandbox']['progress']++;
-
-  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
 }
 
@@ -475,22 +500,24 @@ function acquia_cloud_dashboard_update_environments(&$context) {
  * Helper function for the batch to update tasks info.
  */
 function acquia_cloud_dashboard_update_tasks(&$context) {
-  if (empty($context['sandbox']['progress'])) {
-    $context['sandbox']['progress'] = 0;
-    $context['sandbox']['current'] = 0;
-    $context['sandbox']['max'] = count($context['results']['sites']);
-  }
-  $progress = $context['sandbox']['progress'];
-  $site_name = $context['results']['sites'][$progress]['name'];
-  $context['message'] = t('Refreshing task details for @site', array('@site' => $site_name));
+  if (count($context['results']['sites'])) {
+    if (empty($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+      $context['sandbox']['current'] = 0;
+      $context['sandbox']['max'] = count($context['results']['sites']);
+    }
+    $progress = $context['sandbox']['progress'];
+    $site_name = $context['results']['sites'][$progress]['name'];
+    $context['message'] = t('Refreshing task details for @site', array('@site' => $site_name));
 
-  $task_list_raw = acquia_cloud_dashboard_curl_caller("sites/$site_name/tasks");
+    $task_list_raw = acquia_cloud_dashboard_curl_caller("sites/$site_name/tasks");
 
-  $context['results']['tasks'][$site_name] = $task_list_raw;
-  $context['sandbox']['progress']++;
+    $context['results']['tasks'][$site_name] = $task_list_raw;
+    $context['sandbox']['progress']++;
 
-  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+      $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    }
   }
 }
 
@@ -498,178 +525,185 @@ function acquia_cloud_dashboard_update_tasks(&$context) {
  * Helper function that builds the report markup.
  */
 function acquia_cloud_dashboard_update_generate_html(&$context) {
-  $context['message'] = t('Preparing Cloud API dashboard.');
-  $report_html = '';
-  /*
-   * Show Sites info
-   */
-  $sites_data = $context['results']['sites'];
-  $header = array();
-  $rows = array();
-  $header[] = array("data" => "Site Name");
-  $header[] = array("data" => "Site Information");
-  foreach ($sites_data as $site) {
-    $site_name = $site['name'];
-    $row = array();
-    $row[] = $site_name;
+  if (count($context['results']['sites'])) {
+    $context['message'] = t('Preparing Cloud API dashboard.');
+    $report_html = '';
     /*
-     * Get the site info
+     * Show Sites info
      */
-    $site_rows = array();
-    foreach ($site['info'] as $key => $value) {
-      $site_row = array();
-      $site_row[] = $key;
-      $site_row[] = $value;
-      $site_rows[] = $site_row;
-    }
-    $site_info_table_html = theme('table', array(
-      'header' => array('Parameter', 'Value'),
-      'rows' => $site_rows,
-        ));
-
-    /*
-     * Get the Site SSH Keys.
-     */
-    $site_ssh_table_html = l(t('Add SSH Key to this site'), "admin/config/cloud-api/add/key/$site_name");
-    $site_ssh_keys_array = $context['results']['ssh_keys'][$site_name];
-    $site_ssh_keys = array();
-    foreach ($site_ssh_keys_array as $ssh_keys) {
-      $site_ssh_row = array();
-      $site_ssh_row[] = $ssh_keys['nickname'];
-      $site_ssh_row[] = drupal_substr($ssh_keys['public'], 0, 10) . ".....";
-      $key_id = $ssh_keys['id'];
-      $key_nick = $ssh_keys['nickname'];
-      $site_ssh_row[] = l(t('Delete Key'), "admin/config/cloud-api/delete/key/$site_name/$key_id/$key_nick");
-      $site_ssh_keys[] = $site_ssh_row;
-    }
-    $site_ssh_table_html .= theme('table', array(
-      'header' => array('SSH Key Nick Name', 'SSH Key', 'Delete'),
-      'rows' => $site_ssh_keys,
-        ));
-
-    /*
-     * Get the Site DBs
-     */
-    $site_databases_array = $context['results']['dbs'][$site_name];
-    $site_dbs = array();
-    foreach ($site_databases_array as $key => $value) {
-      $site_db_row = array();
-      $site_db_row[] = $value;
-      $site_dbs[] = $site_db_row;
-    }
-    $site_dbs_table_html = theme('table', array(
-      'header' => array('Databases'),
-      'rows' => $site_dbs,
-        ));
-
-    /*
-     * Get the Environments
-     */
-    $site_envs_array = $context['results']['environments'][$site_name];
-    $site_envs = array();
-    foreach ($site_envs_array as $key => $value) {
-      $site_env_row = array();
-      $env = $key;
-      $site_env_row[] = $env;
+    $sites_data = $context['results']['sites'];
+    $header = array();
+    $rows = array();
+    $header[] = array("data" => "Site Name");
+    $header[] = array("data" => "Site Information");
+    foreach ($sites_data as $site) {
+      $site_name = $site['name'];
+      $row = array();
+      $row[] = $site_name;
       /*
-       * For each Env, get the domains
+       * Get the site info
        */
-      $env_domains_table_html = l(t('Add Domain to this Environment'), "admin/config/cloud-api/add/domain/$site_name/$env");
-      $env_domains_array = $context['results']['environments'][$site_name][$env]['domains'];
-      $env_domains = array();
-      foreach ($env_domains_array as $domain_name) {
-        $env_domain_row = array();
-        $env_domain_row[] = $domain_name;
-        $env_domain_row[] = l(t('Delete Domain'), "admin/config/cloud-api/delete/domain/$site_name/$env/$domain_name");
-        $env_domain_row[] = l(t('Purge Varnish Cache'), "admin/config/cloud-api/purge/domain/$site_name/$env/$domain_name");
-        $env_domains[] = $env_domain_row;
+      $site_rows = array();
+      foreach ($site['info'] as $key => $value) {
+        $site_row = array();
+        $site_row[] = $key;
+        $site_row[] = $value;
+        $site_rows[] = $site_row;
       }
-      $env_domains_table_html .= theme('table', array(
-        'header' => array('Domain', 'Delete', 'Purge Varnish'),
-        'rows' => $env_domains,
+      $site_info_table_html = theme('table', array(
+        'header' => array('Parameter', 'Value'),
+        'rows' => $site_rows,
           ));
 
       /*
-       * For each Env, get the servers
+       * Get the Site SSH Keys.
        */
-      $env_servers_array = $context['results']['environments'][$site_name][$env]['servers'];
-      $env_servers = array();
-      foreach ($env_servers_array as $key => $value) {
-        $env_server_row = array();
-        $server_name = $key;
-        $env_server_row[] = $server_name;
+      $site_ssh_table_html = l(t('Add SSH Key to this site'), "admin/config/cloud-api/add/key/$site_name");
+      $site_ssh_keys_array = $context['results']['ssh_keys'][$site_name];
+      $site_ssh_keys = array();
+      foreach ($site_ssh_keys_array as $ssh_keys) {
+        $site_ssh_row = array();
+        $site_ssh_row[] = $ssh_keys['nickname'];
+        $site_ssh_row[] = drupal_substr($ssh_keys['public'], 0, 10) . ".....";
+        $key_id = $ssh_keys['id'];
+        $key_nick = $ssh_keys['nickname'];
+        $site_ssh_row[] = l(t('Delete Key'), "admin/config/cloud-api/delete/key/$site_name/$key_id/$key_nick");
+        $site_ssh_keys[] = $site_ssh_row;
+      }
+      $site_ssh_table_html .= theme('table', array(
+        'header' => array('SSH Key Nick Name', 'SSH Key', 'Delete'),
+        'rows' => $site_ssh_keys,
+          ));
 
+      /*
+       * Get the Site DBs
+       */
+      $site_databases_array = $context['results']['dbs'][$site_name];
+      $site_dbs = array();
+      foreach ($site_databases_array as $key => $value) {
+        $site_db_row = array();
+        $site_db_row[] = $value;
+        $site_dbs[] = $site_db_row;
+      }
+      $site_dbs_table_html = theme('table', array(
+        'header' => array('Databases'),
+        'rows' => $site_dbs,
+          ));
+
+      /*
+       * Get the Environments
+       */
+      $site_envs_array = $context['results']['environments'][$site_name];
+      $site_envs = array();
+      foreach ($site_envs_array as $key => $value) {
+        $site_env_row = array();
+        $env = $key;
+        $site_env_row[] = $env;
         /*
-         * Get the server info
+         * For each Env, get the domains
          */
-        $server_info_array = $context['results']['environments'][$site_name][$env]['servers'][$server_name];
-        $server_rows = array();
-        foreach ($server_info_array as $key => $value) {
-          $server_row = array();
-          $server_row[] = $key;
-          $server_row[] = $value;
-          $server_rows[] = $server_row;
+        $env_domains_table_html = l(t('Add Domain to this Environment'), "admin/config/cloud-api/add/domain/$site_name/$env");
+        $env_domains_array = $context['results']['environments'][$site_name][$env]['domains'];
+        $env_domains = array();
+        foreach ($env_domains_array as $domain_name) {
+          $env_domain_row = array();
+          $env_domain_row[] = $domain_name;
+          $env_domain_row[] = l(t('Delete Domain'), "admin/config/cloud-api/delete/domain/$site_name/$env/$domain_name");
+          $env_domain_row[] = l(t('Purge Varnish Cache'), "admin/config/cloud-api/purge/domain/$site_name/$env/$domain_name");
+          $env_domains[] = $env_domain_row;
         }
-        $server_info_table_html = theme('table', array(
-          'header' => array('Parameter', 'Value'),
-          'rows' => $server_rows,
+        $env_domains_table_html .= theme('table', array(
+          'header' => array('Domain', 'Delete', 'Purge Varnish'),
+          'rows' => $env_domains,
             ));
 
-        $env_server_row[] = $server_info_table_html;
-        $env_servers[] = $env_server_row;
+        /*
+         * For each Env, get the servers
+         */
+        $env_servers_array = $context['results']['environments'][$site_name][$env]['servers'];
+        $env_servers = array();
+        foreach ($env_servers_array as $key => $value) {
+          $env_server_row = array();
+          $server_name = $key;
+          $env_server_row[] = $server_name;
+
+          /*
+           * Get the server info
+           */
+          $server_info_array = $context['results']['environments'][$site_name][$env]['servers'][$server_name];
+          $server_rows = array();
+          foreach ($server_info_array as $key => $value) {
+            $server_row = array();
+            $server_row[] = $key;
+            $server_row[] = $value;
+            $server_rows[] = $server_row;
+          }
+          $server_info_table_html = theme('table', array(
+            'header' => array('Parameter', 'Value'),
+            'rows' => $server_rows,
+              ));
+
+          $env_server_row[] = $server_info_table_html;
+          $env_servers[] = $env_server_row;
+        }
+        $env_servers_table_html = theme('table', array(
+          'header' => array('Server', 'Server Info'),
+          'rows' => $env_servers,
+            ));
+
+        $site_env_row[] = $env_domains_table_html . $env_servers_table_html;
+        $site_envs[] = $site_env_row;
       }
-      $env_servers_table_html = theme('table', array(
-        'header' => array('Server', 'Server Info'),
-        'rows' => $env_servers,
+      $site_envs_table_html = theme('table', array(
+        'header' => array('Environment', 'Environment Details'),
+        'rows' => $site_envs,
           ));
 
-      $site_env_row[] = $env_domains_table_html . $env_servers_table_html;
-      $site_envs[] = $site_env_row;
+      /*
+       * Get Task List for Site
+       */
+      $task_list_raw = $context['results']['tasks'][$site_name];
+      $no_of_tasks = variable_get('acquia_cloud_dashboard_no_of_tasks', 25);
+      $tasks_array_trimmed = array_reverse(array_slice($task_list_raw, -$no_of_tasks));
+      $task_rows = array();
+      foreach ($tasks_array_trimmed as $key => $value) {
+        $task_row = array();
+        $task_row[] = date('l jS \of F Y h:i:s A', $value['started']);
+        $task_row[] = $value['state'];
+        $task_row[] = $value['description'];
+        $task_rows[] = $task_row;
+      }
+      $site_tasks_table_html = theme('table', array(
+        'header' => array('Time Started', 'Status', 'Task Details'),
+        'rows' => $task_rows,
+          ));
+
+      /*
+       * Join the report
+       */
+      $row[] = $site_info_table_html . $site_ssh_table_html . $site_dbs_table_html . $site_envs_table_html . $site_tasks_table_html;
+
+      $rows[] = $row;
     }
-    $site_envs_table_html = theme('table', array(
-      'header' => array('Environment', 'Environment Details'),
-      'rows' => $site_envs,
-        ));
 
-    /*
-     * Get Task List for Site
-     */
-    $task_list_raw = $context['results']['tasks'][$site_name];
-    $no_of_tasks = variable_get('acquia_cloud_dashboard_no_of_tasks', 25);
-    $tasks_array_trimmed = array_reverse(array_slice($task_list_raw, -$no_of_tasks));
-    $task_rows = array();
-    foreach ($tasks_array_trimmed as $key => $value) {
-      $task_row = array();
-      $task_row[] = date('l jS \of F Y h:i:s A', $value['started']);
-      $task_row[] = $value['state'];
-      $task_row[] = $value['description'];
-      $task_rows[] = $task_row;
-    }
-    $site_tasks_table_html = theme('table', array(
-      'header' => array('Time Started', 'Status', 'Task Details'),
-      'rows' => $task_rows,
-        ));
+    $report_html .= theme('table', array('header' => $header, 'rows' => $rows));
 
-    /*
-     * Join the report
-     */
-    $row[] = $site_info_table_html . $site_ssh_table_html . $site_dbs_table_html . $site_envs_table_html . $site_tasks_table_html;
-
-    $rows[] = $row;
+    variable_set('acquia_cloud_dashboard_report_raw', $context['results']);
+    variable_set('acquia_cloud_dashboard_last_report_generated_time', REQUEST_TIME);
+    variable_set('acquia_cloud_dashboard_report_html', $report_html);
   }
-
-  $report_html .= theme('table', array('header' => $header, 'rows' => $rows));
-
-  variable_set('acquia_cloud_dashboard_report_raw', $context['results']);
-  variable_set('acquia_cloud_dashboard_last_report_generated_time', REQUEST_TIME);
-  variable_set('acquia_cloud_dashboard_report_html', $report_html);
 }
 
 /**
  * Helper function showing the batch report generation completion.
  */
 function acquia_cloud_dashboard_update_finished($success, $results, $operations) {
-  drupal_set_message(t('Cloud Status Report has been refreshed'));
+  if (count($results['sites'])) {
+    drupal_set_message(t('Cloud Status Report has been refreshed'));
+  }
+  else {
+    drupal_set_message(t('There was an issue with refreshing your Cloud Report'), 'warning');
+  }
 }
 
 /**
