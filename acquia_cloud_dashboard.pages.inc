@@ -52,7 +52,7 @@ function acquia_cloud_dashboard_configure_form() {
 
   $form = system_settings_form($form);
   $form['#submit'][] = 'acquia_cloud_dashboard_configure_form_submit_set_unset_incorrect_creds_flag';
-  return($form);
+  return $form;
 }
 
 /**
