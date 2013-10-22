@@ -339,9 +339,9 @@ function acquia_cloud_dashboard_report_refresh() {
  * Page call back that returns the report markup.
  */
 function acquia_cloud_dashboard_report() {
-  //Check and proceed only if configured.
+  // Check and proceed only if configured.
   if (variable_get('acquia_cloud_dashboard_username', "") != "") {
-    //Append the Last Updated Timestamp to show on report.
+    // Append the Last Updated Timestamp to show on report.
     $report_html = t('<b>Report was last updated !time_ago ago</b><br/>', array('!time_ago' => format_interval(REQUEST_TIME - variable_get('acquia_cloud_dashboard_last_report_generated_time'))));
     $report_html .= l(t('Refresh Report'), 'admin/config/cloud-api/refresh');
 
@@ -377,7 +377,7 @@ function acquia_cloud_dashboard_report() {
 function acquia_cloud_dashboard_update_sites(&$context) {
   $context['message'] = t('Refreshing sites list.');
   $sites_data = acquia_cloud_dashboard_curl_caller("sites");
-  //Proceed only if creds are a match. Else set a flag.
+  // Proceed only if creds are a match. Else set a flag.
   if ($sites_data['message'] != NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API) {
     $site_names = array();
     foreach ($sites_data as $value) {
