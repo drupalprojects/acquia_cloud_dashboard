@@ -14,10 +14,7 @@ function acquia_cloud_dashboard_menu() {
     'title' => 'Acquia Cloud Dashboard',
     'description' => 'Control Acquia Cloud Hosting right from Drupal Site',
     'position' => 'left',
-    'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access cloud api report'),
-    'file' => 'system.admin.inc',
-    'file path' => drupal_get_path('module', 'system'),
   );
   $items['admin/config/cloud-api/view'] = array(
     'title' => 'Acquia Cloud API Report',

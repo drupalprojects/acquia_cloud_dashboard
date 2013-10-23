@@ -6,6 +6,7 @@
  */
 
 define("NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API", "Not authorized");
+define("CLOUD_DASHBOARD_API_BASE_URL", "https://cloudapi.acquia.com/v1/");
 
 /**
  * Acquia Cloud API settings form.
@@ -732,7 +733,7 @@ function acquia_cloud_dashboard_update_finished($success, $results, $operations)
  * Helper method that makes the Curl Calls (GET).
  */
 function acquia_cloud_dashboard_curl_caller($method) {
-  $url = "https://cloudapi.acquia.com/v1/" . $method . ".json";
+  $url = CLOUD_DASHBOARD_API_BASE_URL . $method . ".json";
   $username = variable_get('acquia_cloud_dashboard_username', "");
   $password = variable_get('acquia_cloud_dashboard_password', "");
   $ch = curl_init($url);
@@ -748,7 +749,7 @@ function acquia_cloud_dashboard_curl_caller($method) {
  * Helper function that makes the curl calls (POST).
  */
 function acquia_cloud_dashboard_curl_caller_post($method, $request = "POST", $binary = FALSE, $post_data = array(), $params = array()) {
-  $url = "https://cloudapi.acquia.com/v1/" . $method . ".json";
+  $url = CLOUD_DASHBOARD_API_BASE_URL . $method . ".json";
 
   if (count($params)) {
     $url .= "?";
