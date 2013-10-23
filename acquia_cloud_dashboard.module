@@ -14,94 +14,48 @@ function acquia_cloud_dashboard_menu() {
     'title' => 'Acquia Cloud Dashboard',
     'description' => 'Control Acquia Cloud Hosting right from Drupal Site',
     'position' => 'left',
-    'access arguments' => array('access cloud api report'),
+    'route_name' => 'acquia_cloud_dashboard.cloud_api',
   );
   $items['admin/config/cloud-api/view'] = array(
     'title' => 'Acquia Cloud API Report',
     'description' => 'Report of your Acquia Cloud',
-    'page callback' => 'acquia_cloud_dashboard_report',
-    'access arguments' => array('access cloud api report'),
-    'file' => 'acquia_cloud_dashboard.pages.inc',
+    'route_name' => 'acquia_cloud_dashboard.report',
     'type' => MENU_NORMAL_ITEM,
   );
   $items['admin/config/cloud-api/refresh'] = array(
     'title' => 'Refresh Acquia Cloud API Report',
     'description' => 'Refreshes your Acquia Cloud',
-    'page callback' => 'acquia_cloud_dashboard_report_refresh',
-    'access arguments' => array('refresh cloud api report'),
-    'file' => 'acquia_cloud_dashboard.pages.inc',
+    'route_name' => 'acquia_cloud_dashboard.refresh',
   );
   $items['admin/config/cloud-api/configure'] = array(
     'title' => 'Acquia Cloud API Configuration',
     'description' => 'Configuring of your Acquia Cloud',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('acquia_cloud_dashboard_configure_form'),
-    'access arguments' => array('configure cloud api'),
-    'file' => 'acquia_cloud_dashboard.pages.inc',
+    'route_name' => 'acquia_cloud_dashboard.configure',
   );
   $items['admin/config/cloud-api/add/domain/%/%'] = array(
     'title' => 'Acquia Cloud API Add Domains',
     'description' => 'Add Domains on Acquia Cloud',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array(
-      'acquia_cloud_dashboard_configure_add_domain_form',
-      5,
-      6,
-    ),
-    'access arguments' => array('add domains cloud api'),
-    'file' => 'acquia_cloud_dashboard.pages.inc',
-    'type' => MENU_CALLBACK,
+    'route_name' => 'acquia_cloud_dashboard.domain_add',
   );
   $items['admin/config/cloud-api/delete/domain/%/%/%'] = array(
     'title' => 'Acquia Cloud API Delete Domains',
     'description' => 'Delete Domains on Acquia Cloud',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array(
-      'acquia_cloud_dashboard_configure_delete_domain_form',
-      5,
-      6,
-      7,
-    ),
-    'access arguments' => array('delete domains cloud api'),
-    'file' => 'acquia_cloud_dashboard.pages.inc',
-    'type' => MENU_CALLBACK,
+    'route_name' => 'acquia_cloud_dashboard.domain_delete',
   );
   $items['admin/config/cloud-api/purge/domain/%/%/%'] = array(
     'title' => 'Acquia Cloud API Purge Domain Varnish Cache',
     'description' => 'Purge Domain Cache on Acquia Cloud',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array(
-      'acquia_cloud_dashboard_configure_purge_varnish_form',
-      5,
-      6,
-      7,
-    ),
-    'access arguments' => array('purge domain cache cloud api'),
-    'file' => 'acquia_cloud_dashboard.pages.inc',
-    'type' => MENU_CALLBACK,
+    'route_name' => 'acquia_cloud_dashboard.domain_purge',
   );
   $items['admin/config/cloud-api/add/key/%'] = array(
     'title' => 'Acquia Cloud API Add SSH Key',
     'description' => 'Add SSH Key on Acquia Cloud',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('acquia_cloud_dashboard_configure_add_key_form', 5),
-    'access arguments' => array('add key cloud api'),
-    'file' => 'acquia_cloud_dashboard.pages.inc',
-    'type' => MENU_CALLBACK,
+    'route_name' => 'acquia_cloud_dashboard.key_add',
   );
   $items['admin/config/cloud-api/delete/key/%/%/%'] = array(
     'title' => 'Acquia Cloud API Delete Domains',
     'description' => 'Delete SSH Key on Acquia Cloud',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array(
-      'acquia_cloud_dashboard_configure_delete_key_form',
-      5,
-      6,
-      7,
-    ),
-    'access arguments' => array('delete key cloud api'),
-    'file' => 'acquia_cloud_dashboard.pages.inc',
-    'type' => MENU_CALLBACK,
+    'route_name' => 'acquia_cloud_dashboard.key_delete',
   );
   return $items;
 }
@@ -144,4 +98,214 @@ function acquia_cloud_dashboard_permission() {
       'description' => t('Allows user to delete SSH Keys on to Acquia Cloud'),
     ),
   );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function acquia_cloud_dashboard_theme() {
+  return array(
+    'acquia_dashboard_report' => array(
+      'template' => 'acquia-dashboard-report',
+      'variables' => array('report' => NULL, 'updated' => NULL),
+    ),
+  );
+}
+
+/**
+ * Helper function for the batch to update sites info.
+ */
+function acquia_cloud_dashboard_update_sites(&$context) {
+  $api = new \Drupal\acquia_cloud_dashboard\CloudAPIHelper();
+  $context['message'] = t('Refreshing sites list.');
+  $sites_data = $api->callMethod("sites");
+
+  if ($sites_data) {
+    $site_names = array();
+    foreach ($sites_data as $value) {
+      $site_raw_name = explode(':', $value);
+
+      // Fetch the site info.
+      $site_info_array = $api->callMethod("sites/" . $site_raw_name[1]);
+      $site_names[] = array(
+        'name' => $site_raw_name[1],
+        'info' => $site_info_array,
+      );
+    }
+
+    $context['results']['sites'] = $site_names;
+  }
+}
+
+/**
+ * Helper function for the batch to update ssh keys info.
+ */
+function acquia_cloud_dashboard_update_ssh_keys(&$context) {
+  $api = new \Drupal\acquia_cloud_dashboard\CloudAPIHelper();
+  if (count($context['results']['sites'])) {
+    if (empty($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+      $context['sandbox']['current'] = 0;
+      $context['sandbox']['max'] = count($context['results']['sites']);
+    }
+    $progress = $context['sandbox']['progress'];
+    $site_name = $context['results']['sites'][$progress]['name'];
+    $context['message'] = t('Refreshing SSH keys for @site', array('@site' => $site_name));
+
+    $site_ssh_keys_array = $api->callMethod("sites/$site_name/sshkeys");
+    $site_ssh_keys = array();
+    foreach ($site_ssh_keys_array as $ssh_key) {
+      $site_ssh_keys[] = array(
+        'id' => $ssh_key['id'],
+        'nickname' => $ssh_key['nickname'],
+        'public' => $ssh_key['ssh_pub_key'],
+        'short' => drupal_substr($ssh_key['ssh_pub_key'], 0, 10) . "...",
+      );
+    }
+    $context['results']['sites'][$progress]['keys'] = $site_ssh_keys;
+    $context['sandbox']['progress']++;
+
+    if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+      $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    }
+  }
+}
+
+/**
+ * Helper function for the batch to update db info.
+ */
+function acquia_cloud_dashboard_update_dbs(&$context) {
+  $api = new \Drupal\acquia_cloud_dashboard\CloudAPIHelper();
+  if (count($context['results']['sites'])) {
+    if (empty($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+      $context['sandbox']['current'] = 0;
+      $context['sandbox']['max'] = count($context['results']['sites']);
+    }
+    $progress = $context['sandbox']['progress'];
+    $site_name = $context['results']['sites'][$progress]['name'];
+    $context['message'] = t('Refreshing databases for @site', array('@site' => $site_name));
+
+    $site_databases_array = $api->callMethod("sites/$site_name/dbs");
+    $site_dbs = array();
+    foreach ($site_databases_array as $database) {
+      $site_dbs[] = $database['name'];
+    }
+
+    $context['results']['sites'][$progress]['dbs'] = $site_dbs;
+    $context['sandbox']['progress']++;
+
+    if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+      $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    }
+  }
+}
+
+/**
+ * Helper function for the batch to update environments info.
+ */
+function acquia_cloud_dashboard_update_environments(&$context) {
+  $api = new \Drupal\acquia_cloud_dashboard\CloudAPIHelper();
+  if (count($context['results']['sites'])) {
+    if (empty($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+      $context['sandbox']['current'] = 0;
+      $context['sandbox']['max'] = count($context['results']['sites']);
+    }
+    $progress = $context['sandbox']['progress'];
+    $site_name = $context['results']['sites'][$progress]['name'];
+    $context['message'] = t('Refreshing environment details for @site', array('@site' => $site_name));
+
+    $site_envs_array = $api->callMethod("sites/$site_name/envs");
+    $site_envs = array();
+    foreach ($site_envs_array as $environment) {
+      $env = $environment['name'];
+
+      // Fetch the domains associated with this environment.
+      $env_domains_array = $api->callMethod("sites/$site_name/envs/$env/domains");
+      $env_domains = array();
+      foreach ($env_domains_array as $domain) {
+        $env_domains[] = $domain['name'];
+      }
+
+      // Fetch the servers associated with this environment.
+      $env_servers_array = $api->callMethod("sites/$site_name/envs/$env/servers");
+      $env_servers = array();
+      foreach ($env_servers_array as $server) {
+        $server_name = $server['name'];
+
+        // Fetch the server info.
+        $server_info_array = $api->callMethod("sites/$site_name/envs/$env/servers/$server_name");
+        $server_services = $server_info_array['services'];
+        unset($server_info_array['services']);
+        $env_servers[] = array(
+          'name' => $server_name,
+          'info' => $server_info_array,
+          'services' => $server_services,
+        );
+      }
+
+      $site_envs[] = array(
+        'name' => $env,
+        'domains' => $env_domains,
+        'servers' => $env_servers,
+      );
+    }
+
+    $context['results']['sites'][$progress]['environments'] = $site_envs;
+    $context['sandbox']['progress']++;
+
+    if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+      $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    }
+  }
+}
+
+/**
+ * Helper function for the batch to update tasks info.
+ */
+function acquia_cloud_dashboard_update_tasks(&$context) {
+  $api = new \Drupal\acquia_cloud_dashboard\CloudAPIHelper();
+  if (count($context['results']['sites'])) {
+    if (empty($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+      $context['sandbox']['current'] = 0;
+      $context['sandbox']['max'] = count($context['results']['sites']);
+    }
+    $progress = $context['sandbox']['progress'];
+    $site_name = $context['results']['sites'][$progress]['name'];
+    $context['message'] = t('Refreshing task details for @site', array('@site' => $site_name));
+
+    $task_list_raw = $api->callMethod("sites/$site_name/tasks");
+
+    foreach ($task_list_raw as $key => $value) {
+      $task_list_raw[$key]['started'] = date('l jS \of F Y h:i:s A', $value['started']);
+    }
+
+    $task_limit = \Drupal::config('acquia_cloud_dashboard.settings')->get('task_limit');
+    $tasks_list_trimmed = array_reverse(array_slice($task_list_raw, -$task_limit));
+
+    $context['results']['sites'][$progress]['tasks'] = $tasks_list_trimmed;
+    $context['sandbox']['progress']++;
+
+    if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+      $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    }
+  }
+}
+
+/**
+ * Helper function showing the batch report generation completion.
+ */
+function acquia_cloud_dashboard_update_finished($success, $results, $operations) {
+  if (isset($results['sites']) && count($results['sites'])) {
+    \Drupal::config('acquia_cloud_dashboard.settings')
+      ->set('report', $results)
+      ->set('last_generated', REQUEST_TIME)
+      ->save();
+    drupal_set_message(t('Cloud Status Report has been refreshed'));
+  }
+  else {
+    drupal_set_message(t('There was an issue with refreshing your Cloud Report'), 'warning');
+  }
 }
