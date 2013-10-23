@@ -4,7 +4,6 @@
  * @file
  * The configuration and report pages of Acquia Cloud API
  */
-
 define("NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API", "Not authorized");
 define("CLOUD_DASHBOARD_API_BASE_URL", "https://cloudapi.acquia.com/v1/");
 
@@ -365,6 +364,13 @@ function acquia_cloud_dashboard_report() {
      */
     if (variable_get('acquia_cloud_dashboard_incorrect_creds_flag', 0)) {
       drupal_set_message(t('Your cloud credentials look incorrect. Corrrect them on the  <a href="@config">settings page</a>.', array('@config' => url('admin/config/cloud-api/configure'))), 'error');
+    }
+    /*
+     * If there was an error in communicating with API, then a flag is set.
+     * Checking for the flag here and showing a message.
+     */
+    if (variable_get('acquia_cloud_dashboard_stale_report_flag', 0)) {
+      drupal_set_message(t('You have made some changes that might not have been reflected on the report. <a href="@refresh">Click here</a> to refresh the report.', array('@refresh' => url('admin/config/cloud-api/refresh'))), 'error');
     }
     return $report_html;
   }
@@ -727,6 +733,11 @@ function acquia_cloud_dashboard_update_finished($success, $results, $operations)
   else {
     drupal_set_message(t('There was an issue with refreshing your Cloud Report'), 'warning');
   }
+  /*
+   * Reset the stale content flag as the report was successful. This flag is set
+   * again whenever a post request is sent.
+   */
+  variable_set('acquia_cloud_dashboard_stale_report_flag', 0);
 }
 
 /**
@@ -778,4 +789,12 @@ function acquia_cloud_dashboard_curl_caller_post($method, $request = "POST", $bi
   curl_exec($ch);
   curl_close($ch);
   drupal_set_message(t('Command Sent to Cloud API'));
+
+  /*
+   * All POST Operations make changes to the state of the Cloud Hosting.
+   * The report is not immediately refreshed. So the user might not be seeing
+   * latest report and might not be aware of it. Hence this flag.
+   * This flag is used to show an apporpriate message.
+   */
+  variable_set('acquia_cloud_dashboard_stale_report_flag', 1);
 }
