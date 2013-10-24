@@ -8,7 +8,7 @@
 namespace Drupal\acquia_cloud_dashboard\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
-use Drupal\acquia_cloud_dashboard\CloudAPIHelper;
+use Drupal\acquia_cloud_dashboard\CloudAPICommand;
 
 class DomainForm extends ConfigFormBase {
 
@@ -59,8 +59,9 @@ class DomainForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $api = new CloudAPIHelper();
+    $api = new CloudAPICommand();
     $api->postMethod('sites/' . $this->site . '/envs/' . $this->environment . '/domains/' . $form_state['values']['domain']);
+    $api->refreshDomains($this->site, $this->environment);
     $form_state['redirect'] = 'admin/config/cloud-api/view';
     parent::submitForm($form, $form_state);
   }

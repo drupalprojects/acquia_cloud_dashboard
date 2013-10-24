@@ -8,7 +8,7 @@
 namespace Drupal\acquia_cloud_dashboard\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
-use Drupal\acquia_cloud_dashboard\CloudAPIHelper;
+use Drupal\acquia_cloud_dashboard\CloudAPICommand;
 
 class SSHKeyForm extends ConfigFormBase {
 
@@ -54,12 +54,13 @@ class SSHKeyForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $api = new CloudAPIHelper();
+    $api = new CloudAPICommand();
     $api->postMethod('sites/' . $this->site . '/sshkeys', 'POST', TRUE, array(
       'ssh_pub_key' => $form_state['values']['key'],
     ), array(
       'nickname' => $form_state['values']['nickname'],
     ));
+    $api->refreshKeys($this->site);
     $form_state['redirect'] = 'admin/config/cloud-api/view';
     parent::submitForm($form, $form_state);
   }

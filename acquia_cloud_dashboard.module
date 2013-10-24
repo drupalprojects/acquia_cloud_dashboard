@@ -124,11 +124,12 @@ function acquia_cloud_dashboard_update_sites(&$context) {
     $site_names = array();
     foreach ($sites_data as $value) {
       $site_raw_name = explode(':', $value);
+      $site_name = $site_raw_name[1];
 
       // Fetch the site info.
       $site_info_array = $api->callMethod("sites/" . $site_raw_name[1]);
-      $site_names[] = array(
-        'name' => $site_raw_name[1],
+      $site_names[$site_name] = array(
+        'name' => $site_name,
         'info' => $site_info_array,
       );
     }
@@ -147,9 +148,10 @@ function acquia_cloud_dashboard_update_ssh_keys(&$context) {
       $context['sandbox']['progress'] = 0;
       $context['sandbox']['current'] = 0;
       $context['sandbox']['max'] = count($context['results']['sites']);
+      $context['sandbox']['sites'] = array_keys($context['results']['sites']);
     }
     $progress = $context['sandbox']['progress'];
-    $site_name = $context['results']['sites'][$progress]['name'];
+    $site_name = $context['sandbox']['sites'][$progress];
     $context['message'] = t('Refreshing SSH keys for @site', array('@site' => $site_name));
 
     $site_ssh_keys_array = $api->callMethod("sites/$site_name/sshkeys");
@@ -162,7 +164,7 @@ function acquia_cloud_dashboard_update_ssh_keys(&$context) {
         'short' => drupal_substr($ssh_key['ssh_pub_key'], 0, 10) . "...",
       );
     }
-    $context['results']['sites'][$progress]['keys'] = $site_ssh_keys;
+    $context['results']['sites'][$site_name]['keys'] = $site_ssh_keys;
     $context['sandbox']['progress']++;
 
     if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
@@ -181,9 +183,10 @@ function acquia_cloud_dashboard_update_dbs(&$context) {
       $context['sandbox']['progress'] = 0;
       $context['sandbox']['current'] = 0;
       $context['sandbox']['max'] = count($context['results']['sites']);
+      $context['sandbox']['sites'] = array_keys($context['results']['sites']);
     }
     $progress = $context['sandbox']['progress'];
-    $site_name = $context['results']['sites'][$progress]['name'];
+    $site_name = $context['sandbox']['sites'][$progress];
     $context['message'] = t('Refreshing databases for @site', array('@site' => $site_name));
 
     $site_databases_array = $api->callMethod("sites/$site_name/dbs");
@@ -192,7 +195,7 @@ function acquia_cloud_dashboard_update_dbs(&$context) {
       $site_dbs[] = $database['name'];
     }
 
-    $context['results']['sites'][$progress]['dbs'] = $site_dbs;
+    $context['results']['sites'][$site_name]['dbs'] = $site_dbs;
     $context['sandbox']['progress']++;
 
     if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
@@ -211,9 +214,10 @@ function acquia_cloud_dashboard_update_environments(&$context) {
       $context['sandbox']['progress'] = 0;
       $context['sandbox']['current'] = 0;
       $context['sandbox']['max'] = count($context['results']['sites']);
+      $context['sandbox']['sites'] = array_keys($context['results']['sites']);
     }
     $progress = $context['sandbox']['progress'];
-    $site_name = $context['results']['sites'][$progress]['name'];
+    $site_name = $context['sandbox']['sites'][$progress];
     $context['message'] = t('Refreshing environment details for @site', array('@site' => $site_name));
 
     $site_envs_array = $api->callMethod("sites/$site_name/envs");
@@ -245,14 +249,14 @@ function acquia_cloud_dashboard_update_environments(&$context) {
         );
       }
 
-      $site_envs[] = array(
+      $site_envs[$env] = array(
         'name' => $env,
         'domains' => $env_domains,
         'servers' => $env_servers,
       );
     }
 
-    $context['results']['sites'][$progress]['environments'] = $site_envs;
+    $context['results']['sites'][$site_name]['environments'] = $site_envs;
     $context['sandbox']['progress']++;
 
     if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
@@ -271,9 +275,10 @@ function acquia_cloud_dashboard_update_tasks(&$context) {
       $context['sandbox']['progress'] = 0;
       $context['sandbox']['current'] = 0;
       $context['sandbox']['max'] = count($context['results']['sites']);
+      $context['sandbox']['sites'] = array_keys($context['results']['sites']);
     }
     $progress = $context['sandbox']['progress'];
-    $site_name = $context['results']['sites'][$progress]['name'];
+    $site_name = $context['sandbox']['sites'][$progress];
     $context['message'] = t('Refreshing task details for @site', array('@site' => $site_name));
 
     $task_list_raw = $api->callMethod("sites/$site_name/tasks");
@@ -285,7 +290,7 @@ function acquia_cloud_dashboard_update_tasks(&$context) {
     $task_limit = \Drupal::config('acquia_cloud_dashboard.settings')->get('task_limit');
     $tasks_list_trimmed = array_reverse(array_slice($task_list_raw, -$task_limit));
 
-    $context['results']['sites'][$progress]['tasks'] = $tasks_list_trimmed;
+    $context['results']['sites'][$site_name]['tasks'] = $tasks_list_trimmed;
     $context['sandbox']['progress']++;
 
     if ($context['sandbox']['progress'] != $context['sandbox']['max']) {

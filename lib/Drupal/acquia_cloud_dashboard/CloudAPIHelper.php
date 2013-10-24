@@ -24,14 +24,14 @@ class CloudAPIHelper {
     $this->password = \Drupal::config('acquia_cloud_dashboard.settings')->get('password');
     $this->notAuthorizedResponse = "Not authorized";
 
-    $this->verifyCredentials();
+    $this->verifyCredentialsExist();
   }
 
   /**
    * Verify that the username and password exist, otherwise redirect to the configuration page.
    * @todo: Add an additional option to verify via a Cloud API call when the user saves their credentials.
    */
-  public function verifyCredentials() {
+  public function verifyCredentialsExist() {
     if (!$this->username || !$this->password) {
       drupal_set_message(t('Please configure your Cloud API credentials on the <a href="@url">settings page</a>.', array('@url' => '/admin/config/cloud-api/configure')), 'warning');
     }
@@ -50,7 +50,7 @@ class CloudAPIHelper {
     $decoded_output = Json::decode($server_output);
 
     // Set a flag in the settings if the API returns not authorized.
-    $notAuthorized = ($decoded_output['message'] == $this->notAuthorizedResponse);
+    $notAuthorized = (isset($decoded_output['message']) && $decoded_output['message'] == $this->notAuthorizedResponse);
     \Drupal::config('acquia_cloud_dashboard.settings')
         ->set('invalid_credentials', $notAuthorized)
         ->save();

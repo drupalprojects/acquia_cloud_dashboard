@@ -8,7 +8,7 @@
 namespace Drupal\acquia_cloud_dashboard\Form;
 
 use Drupal\Core\Form\ConfirmFormBase;
-use Drupal\acquia_cloud_dashboard\CloudAPIHelper;
+use Drupal\acquia_cloud_dashboard\CloudAPICommand;
 
 /**
  * Form for deleting an image effect.
@@ -64,8 +64,9 @@ class DomainDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $api = new CloudAPIHelper();
+    $api = new CloudAPICommand();
     $api->postMethod('sites/' . $this->site . '/envs/' . $this->environment . '/domains/' . $this->domain, 'DELETE');
+    $api->refreshDomains($this->site, $this->environment);
     drupal_set_message($this->t('The domain name %name has been deleted.', array('%name' => $this->domain)));
     $form_state['redirect'] = 'admin/config/cloud-api/view';
   }

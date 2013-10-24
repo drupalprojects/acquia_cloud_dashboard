@@ -8,7 +8,7 @@
 namespace Drupal\acquia_cloud_dashboard\Form;
 
 use Drupal\Core\Form\ConfirmFormBase;
-use Drupal\acquia_cloud_dashboard\CloudAPIHelper;
+use Drupal\acquia_cloud_dashboard\CloudAPICommand;
 
 /**
  * Form for deleting an image effect.
@@ -71,8 +71,9 @@ class SSHKeyDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $api = new CloudAPIHelper();
+    $api = new CloudAPICommand();
     $api->postMethod('sites/' . $this->siteName . '/sshkeys/' . $this->keyID, 'DELETE');
+    $api->refreshKeys($this->siteName);
     drupal_set_message($this->t('The SSH key %name has been deleted.', array('%name' => $this->keyNickname)));
     $form_state['redirect'] = 'admin/config/cloud-api/view';
   }
