@@ -8,11 +8,6 @@
 namespace Drupal\acquia_cloud_dashboard\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Drupal\Core\Extension\ModuleHandler;
-use Drupal\Component\Utility\Json;
 use Drupal\Component\Utility\Settings;
 
 class CloudDashboardController extends ControllerBase {
@@ -47,8 +42,7 @@ class CloudDashboardController extends ControllerBase {
       );
     }
     else {
-      drupal_set_message(t('Please configure your Cloud API credentials.'), 'warning');
-      drupal_goto('admin/config/cloud-api/configure');
+      drupal_set_message(t('Please configure your Cloud API credentials <a href="@url">here</a>.', array('@url' => '/admin/config/cloud-api/configure')), 'warning');
     }
   }
 
