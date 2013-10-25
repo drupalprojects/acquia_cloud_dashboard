@@ -575,8 +575,8 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
       $site_rows = array();
       foreach ($site['info'] as $key => $value) {
         $site_row = array();
-        $site_row[] = $key;
-        $site_row[] = $value;
+        $site_row[] = check_plain($key);
+        $site_row[] = check_plain($value);
         $site_rows[] = $site_row;
       }
       $site_info_table_html = theme('table', array(
@@ -592,8 +592,8 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
       $site_ssh_keys = array();
       foreach ($site_ssh_keys_array as $ssh_keys) {
         $site_ssh_row = array();
-        $site_ssh_row[] = $ssh_keys['nickname'];
-        $site_ssh_row[] = drupal_substr($ssh_keys['public'], 0, 10) . ".....";
+        $site_ssh_row[] = check_plain($ssh_keys['nickname']);
+        $site_ssh_row[] = check_plain(drupal_substr($ssh_keys['public'], 0, 10) . ".....");
         $key_id = $ssh_keys['id'];
         $key_nick = $ssh_keys['nickname'];
         $site_ssh_row[] = l(t('Delete Key'), "admin/config/cloud-api/delete/key/$site_name/$key_id/$key_nick");
@@ -611,7 +611,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
       $site_dbs = array();
       foreach ($site_databases_array as $key => $value) {
         $site_db_row = array();
-        $site_db_row[] = $value;
+        $site_db_row[] = check_plain($value);
         $site_dbs[] = $site_db_row;
       }
       $site_dbs_table_html = theme('table', array(
@@ -636,7 +636,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
         $env_domains = array();
         foreach ($env_domains_array as $domain_name) {
           $env_domain_row = array();
-          $env_domain_row[] = $domain_name;
+          $env_domain_row[] = check_plain($domain_name);
           $env_domain_row[] = l(t('Delete Domain'), "admin/config/cloud-api/delete/domain/$site_name/$env/$domain_name");
           $env_domain_row[] = l(t('Purge Varnish Cache'), "admin/config/cloud-api/purge/domain/$site_name/$env/$domain_name");
           $env_domains[] = $env_domain_row;
@@ -653,7 +653,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
         $env_servers = array();
         foreach ($env_servers_array as $key => $value) {
           $env_server_row = array();
-          $server_name = $key;
+          $server_name = check_plain($key);
           $env_server_row[] = $server_name;
 
           /*
@@ -663,8 +663,8 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
           $server_rows = array();
           foreach ($server_info_array as $key => $value) {
             $server_row = array();
-            $server_row[] = $key;
-            $server_row[] = $value;
+            $server_row[] = check_plain($key);
+            $server_row[] = check_plain($value);
             $server_rows[] = $server_row;
           }
           $server_info_table_html = theme('table', array(
@@ -688,9 +688,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
         'rows' => $site_envs,
           ));
 
-      /*
-       * Get Task List for Site
-       */
+      // Get Task List for Site
       $task_list_raw = $context['results']['tasks'][$site_name];
       $no_of_tasks = variable_get('acquia_cloud_dashboard_no_of_tasks', 25);
       $tasks_array_trimmed = array_reverse(array_slice($task_list_raw, -$no_of_tasks));
@@ -698,8 +696,8 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
       foreach ($tasks_array_trimmed as $key => $value) {
         $task_row = array();
         $task_row[] = date('l jS \of F Y h:i:s A', $value['started']);
-        $task_row[] = $value['state'];
-        $task_row[] = $value['description'];
+        $task_row[] = check_plain($value['state']);
+        $task_row[] = check_plain($value['description']);
         $task_rows[] = $task_row;
       }
       $site_tasks_table_html = theme('table', array(
@@ -716,7 +714,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
     }
 
     $report_html .= theme('table', array('header' => $header, 'rows' => $rows));
-
+    
     variable_set('acquia_cloud_dashboard_report_raw', $context['results']);
     variable_set('acquia_cloud_dashboard_last_report_generated_time', REQUEST_TIME);
     variable_set('acquia_cloud_dashboard_report_html', $report_html);
