@@ -70,4 +70,55 @@ class CloudDashboardController extends ControllerBase {
     batch_set($batch);
     return batch_process('admin/config/cloud-api/view');
   }
+
+  /**
+   * Generates a domain overview page.
+   * @todo: This could use some cleanup.
+   */
+  public function domainsPage() {
+    $report = $this->config->get('report');
+
+    $tableData = array();
+    $domains = array();
+    foreach ($report['sites'] as $site) {
+      foreach ($site['environments'] as $environment) {
+        foreach ($environment['domains'] as $domain) {
+          $domains[] = $domain;
+          $operations = '<a href="/admin/config/cloud-api/purge/domain/' . $site['name'] . '/' . $environment['name'] . '/' . $domain . '" class="button">Purge</a>';
+          $operations .= '<a href="/admin/config/cloud-api/delete/domain/' . $site['name'] . '/' . $environment['name'] . '/' . $domain . '" class="button">Delete</a>';
+          $tableData['domain'][] = $domain;
+          $tableData['site'][] = $site['name'];
+          $tableData['environment'][] = $environment['name'];
+          $tableData['operations'][] = $operations;
+        }
+      }
+    }
+
+    $headers = array(
+        array('data' => t('Domain'), 'field' => 'domain'),
+        array('data' => t('Site'), 'field' => 'site'),
+        array('data' => t('Environment'), 'field' => 'environment', 'sort' => 'desc'),
+        array('data' => t('Operations')),
+    );
+
+    $order = tablesort_get_order($headers);
+    $sort = (tablesort_get_sort($headers) == 'desc') ? SORT_DESC : SORT_ASC;
+
+    array_multisort($tableData[$order['sql']], $sort, $domains);
+
+    $rows = array();
+    foreach ($domains as $key => $item) {
+      $rows[] = array(
+        array('data' => $tableData['domain'][$key]),
+        array('data' => $tableData['site'][$key]),
+        array('data' => $tableData['environment'][$key]),
+        array('data' => $tableData['operations'][$key]),
+      );
+    }
+
+    $table = array('header' => $headers, 'sticky' => TRUE, 'rows' => $rows);
+
+    $html = '<ul class="action-links"><li><a href="/admin/config/cloud-api/domains/add" class="button button-action">Add domain</a></li></ul>';
+    return $html .= theme('table', $table);
+  }
 }

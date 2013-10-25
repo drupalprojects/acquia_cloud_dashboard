@@ -13,50 +13,26 @@ function acquia_cloud_dashboard_menu() {
   $items['admin/config/cloud-api'] = array(
     'title' => 'Acquia Cloud Dashboard',
     'description' => 'Control Acquia Cloud Hosting right from Drupal Site',
-    'position' => 'left',
+    'position' => 'right',
+    'weight' => -19,
     'route_name' => 'acquia_cloud_dashboard.cloud_api',
   );
   $items['admin/config/cloud-api/view'] = array(
     'title' => 'Acquia Cloud API Report',
     'description' => 'Report of your Acquia Cloud',
     'route_name' => 'acquia_cloud_dashboard.report',
-    'type' => MENU_NORMAL_ITEM,
   );
-  $items['admin/config/cloud-api/refresh'] = array(
-    'title' => 'Refresh Acquia Cloud API Report',
-    'description' => 'Refreshes your Acquia Cloud',
-    'route_name' => 'acquia_cloud_dashboard.refresh',
+  $items['admin/config/cloud-api/domains'] = array(
+    'title' => 'Acquia Cloud Domains',
+    'description' => 'Control the domains associated with your Acquia Cloud account.',
+    'route_name' => 'acquia_cloud_dashboard.domains',
   );
   $items['admin/config/cloud-api/configure'] = array(
     'title' => 'Acquia Cloud API Configuration',
     'description' => 'Configuring of your Acquia Cloud',
     'route_name' => 'acquia_cloud_dashboard.configure',
   );
-  $items['admin/config/cloud-api/add/domain/%/%'] = array(
-    'title' => 'Acquia Cloud API Add Domains',
-    'description' => 'Add Domains on Acquia Cloud',
-    'route_name' => 'acquia_cloud_dashboard.domain_add',
-  );
-  $items['admin/config/cloud-api/delete/domain/%/%/%'] = array(
-    'title' => 'Acquia Cloud API Delete Domains',
-    'description' => 'Delete Domains on Acquia Cloud',
-    'route_name' => 'acquia_cloud_dashboard.domain_delete',
-  );
-  $items['admin/config/cloud-api/purge/domain/%/%/%'] = array(
-    'title' => 'Acquia Cloud API Purge Domain Varnish Cache',
-    'description' => 'Purge Domain Cache on Acquia Cloud',
-    'route_name' => 'acquia_cloud_dashboard.domain_purge',
-  );
-  $items['admin/config/cloud-api/add/key/%'] = array(
-    'title' => 'Acquia Cloud API Add SSH Key',
-    'description' => 'Add SSH Key on Acquia Cloud',
-    'route_name' => 'acquia_cloud_dashboard.key_add',
-  );
-  $items['admin/config/cloud-api/delete/key/%/%/%'] = array(
-    'title' => 'Acquia Cloud API Delete Domains',
-    'description' => 'Delete SSH Key on Acquia Cloud',
-    'route_name' => 'acquia_cloud_dashboard.key_delete',
-  );
+
   return $items;
 }
 

@@ -14,6 +14,14 @@ acquia_cloud_dashboard.report:
   requirements:
     _permission: 'access cloud api report'
 
+acquia_cloud_dashboard.domains:
+  path: '/admin/config/cloud-api/domains'
+  defaults:
+    _content: '\Drupal\acquia_cloud_dashboard\Controller\CloudDashboardController::domainsPage'
+    _title: 'Acquia Cloud Domains'
+  requirements:
+    _permission: 'access cloud api report'
+
 acquia_cloud_dashboard.refresh:
   path: '/admin/config/cloud-api/refresh'
   defaults:
@@ -31,7 +39,14 @@ acquia_cloud_dashboard.configure:
     _permission: 'configure cloud api'
 
 acquia_cloud_dashboard.domain_add:
-  path: '/admin/config/cloud-api/add/domain/{site_name}/{env}'
+  path: '/admin/config/cloud-api/domains/add'
+  defaults:
+    _form: 'Drupal\acquia_cloud_dashboard\Form\DomainForm'
+  requirements:
+    _permission: 'add domains cloud api'
+
+acquia_cloud_dashboard.domain_add_env:
+  path: '/admin/config/cloud-api/domains/add/{site_name}/{env}'
   defaults:
     _form: 'Drupal\acquia_cloud_dashboard\Form\DomainForm'
   requirements:
