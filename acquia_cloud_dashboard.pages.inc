@@ -564,8 +564,8 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
     $sites_data = $context['results']['sites'];
     $header = array();
     $rows = array();
-    $header[] = array("data" => "Site Name");
-    $header[] = array("data" => "Site Information");
+    $header[] = array("data" => t('Site Name'));
+    $header[] = array("data" => t('Site Information'));
     foreach ($sites_data as $site) {
       $site_name = $site['name'];
       $row = array();
@@ -581,7 +581,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
         $site_rows[] = $site_row;
       }
       $site_info_table_html = theme('table', array(
-        'header' => array('Parameter', 'Value'),
+        'header' => array(t('Parameter'), t('Value')),
         'rows' => $site_rows,
           ));
 
@@ -601,7 +601,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
         $site_ssh_keys[] = $site_ssh_row;
       }
       $site_ssh_table_html .= theme('table', array(
-        'header' => array('SSH Key Nick Name', 'SSH Key', 'Delete'),
+        'header' => array(t('SSH Key Nick Name'), t('SSH Key'), t('Delete')),
         'rows' => $site_ssh_keys,
           ));
 
@@ -616,7 +616,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
         $site_dbs[] = $site_db_row;
       }
       $site_dbs_table_html = theme('table', array(
-        'header' => array('Databases'),
+        'header' => array(t('Databases')),
         'rows' => $site_dbs,
           ));
 
@@ -643,7 +643,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
           $env_domains[] = $env_domain_row;
         }
         $env_domains_table_html .= theme('table', array(
-          'header' => array('Domain', 'Delete', 'Purge Varnish'),
+          'header' => array(t('Domain'), t('Delete'), t('Purge Varnish')),
           'rows' => $env_domains,
             ));
 
@@ -669,7 +669,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
             $server_rows[] = $server_row;
           }
           $server_info_table_html = theme('table', array(
-            'header' => array('Parameter', 'Value'),
+            'header' => array(t('Parameter'), t('Value')),
             'rows' => $server_rows,
               ));
 
@@ -677,7 +677,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
           $env_servers[] = $env_server_row;
         }
         $env_servers_table_html = theme('table', array(
-          'header' => array('Server', 'Server Info'),
+          'header' => array(t('Server'), t('Server Info')),
           'rows' => $env_servers,
             ));
 
@@ -685,7 +685,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
         $site_envs[] = $site_env_row;
       }
       $site_envs_table_html = theme('table', array(
-        'header' => array('Environment', 'Environment Details'),
+        'header' => array(t('Environment'), t('Environment Details')),
         'rows' => $site_envs,
           ));
 
@@ -702,7 +702,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
         $task_rows[] = $task_row;
       }
       $site_tasks_table_html = theme('table', array(
-        'header' => array('Time Started', 'Status', 'Task Details'),
+        'header' => array(t('Time Started'), t('Status'), t('Task Details')),
         'rows' => $task_rows,
           ));
 
