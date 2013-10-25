@@ -74,6 +74,7 @@ class ConfigureForm extends ConfigFormBase {
       ->set('password', $form_state['values']['acquia_cloud_dashboard_password'])
       ->set('refresh_interval', $form_state['values']['acquia_cloud_dashboard_refresh_interval'])
       ->set('task_limit', $form_state['values']['acquia_cloud_dashboard_no_of_tasks'])
+      ->set('invalid_credentials', FALSE)
       ->save();
 
     parent::submitForm($form, $form_state);
