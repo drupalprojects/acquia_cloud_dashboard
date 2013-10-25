@@ -4,6 +4,7 @@
  * @file
  * The configuration and report pages of Acquia Cloud API
  */
+
 define("NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API", "Not authorized");
 define("CLOUD_DASHBOARD_API_BASE_URL", "https://cloudapi.acquia.com/v1/");
 
