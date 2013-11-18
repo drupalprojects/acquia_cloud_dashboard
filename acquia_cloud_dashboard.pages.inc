@@ -689,7 +689,7 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
         'rows' => $site_envs,
           ));
 
-      // Get Task List for Site
+      // Get Task List for Site.
       $task_list_raw = $context['results']['tasks'][$site_name];
       $no_of_tasks = variable_get('acquia_cloud_dashboard_no_of_tasks', 25);
       $tasks_array_trimmed = array_reverse(array_slice($task_list_raw, -$no_of_tasks));
@@ -715,7 +715,6 @@ function acquia_cloud_dashboard_update_generate_html(&$context) {
     }
 
     $report_html .= theme('table', array('header' => $header, 'rows' => $rows));
-    
     variable_set('acquia_cloud_dashboard_report_raw', $context['results']);
     variable_set('acquia_cloud_dashboard_last_report_generated_time', REQUEST_TIME);
     variable_set('acquia_cloud_dashboard_report_html', $report_html);
