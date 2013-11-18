@@ -395,7 +395,7 @@ function acquia_cloud_dashboard_update_sites(&$context) {
   if ($sites_data['message'] != NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API) {
     $site_names = array();
     foreach ($sites_data as $value) {
-      $site_raw_name = explode(':', $value);
+      $site_raw_name = explode(':', check_plain($value));
 
       // Fetch the site info.
       $site_info_array = acquia_cloud_dashboard_curl_caller("sites/" . $site_raw_name[1]);
