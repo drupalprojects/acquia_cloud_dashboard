@@ -5,7 +5,7 @@
  * The configuration and report pages of Acquia Cloud API
  */
 
-define("NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API", "Not authorized");
+define("ACQUIA_CLOUD_DASHBOARD_NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API", "Not authorized");
 define("CLOUD_DASHBOARD_API_BASE_URL", "https://cloudapi.acquia.com/v1/");
 
 /**
@@ -392,7 +392,7 @@ function acquia_cloud_dashboard_update_sites(&$context) {
   $context['message'] = t('Refreshing sites list.');
   $sites_data = acquia_cloud_dashboard_curl_caller("sites");
   // Proceed only if creds are a match. Else set a flag.
-  if ($sites_data['message'] != NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API) {
+  if ($sites_data['message'] != ACQUIA_CLOUD_DASHBOARD_NOT_AUTHORIZED_TEXT_RESPONSE_FROM_API) {
     $site_names = array();
     foreach ($sites_data as $value) {
       $site_raw_name = explode(':', check_plain($value));
